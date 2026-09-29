@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const PORT = 2406
 const mongoose = require('mongoose')
+const path = require('path')
 const cors = require('cors')
 const UserRoute = require('./routes/UserRoute')
 const ContentRoute = require('./routes/ContentRoute')
@@ -27,6 +28,7 @@ const corsHandler = cors ({
 })
 
 app.use(corsHandler)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use("/users", UserRoute)
 app.use("/contents", ContentRoute)
 app.use("/categories", CategoryRoute)

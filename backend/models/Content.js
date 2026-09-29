@@ -17,9 +17,10 @@ const ContentSchema = new Schema ({
         type: String,
         required: true
     },
+    contentImageUrls: [{ type: String }],
     pdfFileUrl: {
       type: String,
-      required: true,
+      // required: true,
     },
     totalPages: {
       type: Number,
