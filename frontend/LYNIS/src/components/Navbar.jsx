@@ -5,18 +5,16 @@ function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Helper to check active link
     const isActive = (path) => location.pathname === path;
 
-    // Check if user is logged in and verify their role
     const token = localStorage.getItem("token");
-    const userRole = localStorage.getItem("role"); // 'admin' or 'user'
+    const userRole = localStorage.getItem("role"); 
 
     return (
         <nav className="cabinet-nav">
             <div className="nav-brand-group" onClick={() => navigate("/")}>
                 <span className="nav-icon">📖</span>
-                <h2 className="nav-brand-title">MagCabinet</h2>
+                <h2 className="nav-brand-title">LYNIS</h2>
             </div>
 
             <div className="nav-links-group">
@@ -39,7 +37,6 @@ function Navbar() {
                     Catalog
                 </button>
 
-                {/* Conditionally render Admin Dashboard link ONLY for admins */}
                 {token && userRole === 'admin' && (
                     <button 
                         onClick={() => navigate("/dashboard")} 
@@ -50,7 +47,6 @@ function Navbar() {
                 )}
             </div>
 
-            {/* Profile Section */}
             <div className="nav-profile-group" onClick={() => navigate("/profile")} title="View Profile">
                 <img 
                     src="https://picsum.photos/seed/user123/100/100" 

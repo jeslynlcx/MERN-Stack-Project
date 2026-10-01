@@ -4,21 +4,12 @@ import Navbar from "../components/Navbar";
 
 function HomePage() {
     const navigate = useNavigate();
-    const userAvatar = "https://picsum.photos/seed/user123/100/100";
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/");
-    };
 
     return (
         <div className="login-wrapper home-wrapper">
-            
-            {/* TOP HEADER */}
             <Navbar/>
-            {/* HERO SECTION (Removed login-card so it's clean and centered) */}
             <div className="hero-section">
-                <h1 className="hero-title">Your Digital Magazine Sanctuary</h1>
+                <h1 className="hero-title">Digital Books and Magazine</h1>
                 <p className="hero-desc">
                     Organize, explore, and immerse yourself in your personal antique cabinet filled with your favorite magazine and book collections.
                 </p>
@@ -30,7 +21,6 @@ function HomePage() {
                 </button>
             </div>
 
-            {/* MIDDLE CONTENT: FEATURES (All 3 will sit nicely in one row) */}
             <div className="features-container">
                 <div className="feature-box">
                     <h3>📚 5x5 Grid Shelves</h3>
@@ -51,7 +41,6 @@ function HomePage() {
                 <p className="teaser-sub">Explore top-rated vintage issues and modern catalog arrivals.</p>
             </div>
 
-            {/* BOTTOM FOOTER */}
             <footer className="home-footer">
                 <div className="footer-content">
                     <div className="footer-col">

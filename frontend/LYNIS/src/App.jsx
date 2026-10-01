@@ -8,6 +8,7 @@ import Catalog from './pages/Catalog'
 import Book from './pages/Book'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
+import BookReader from './components/BookReader'
 
 function App() {
 

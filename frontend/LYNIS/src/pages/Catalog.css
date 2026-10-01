@@ -357,3 +357,27 @@
 .cancel-btn:hover {
     background: #444;
 }
+
+
+/* Ensure full width for both file upload wrappers */
+.file-upload-wrapper {
+    position: relative;
+    width: 100% !important;
+    background: #121212;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.file-upload-wrapper input[type="file"] {
+    width: 100% !important;
+    color: #fff;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+}

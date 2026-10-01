@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import api from "../utils/api";
 import Navbar from "../components/Navbar";
-import "./Catalog.css";
+import "./Catalog.css"; // Ensure this matches your exact CSS filename
 
 function Catalog() {
     const [contents, setContents] = useState([]);
@@ -10,36 +10,30 @@ function Catalog() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     
-    // Admin role check state
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // Modal & Form states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState(null);
 
-    // Toggle modes: "url" or "file"
     const [coverMode, setCoverMode] = useState("file");
-    const [contentMode, setContentMode] = useState("url");
+    const [contentMode, setContentMode] = useState("file");
 
-    // Form text fields
     const [formData, setFormData] = useState({
         name: "",
         description: "",
         category: "",
         coverImageUrl: "",
-        contentImageUrls: "", 
         totalPages: 1,
         status: "Published"
     });
 
-    // File states for direct uploads
+    const [contentImageUrls, setContentImageUrls] = useState([""]);
     const [coverImageFile, setCoverImageFile] = useState(null);
     const [contentImageFiles, setContentImageFiles] = useState([]);
 
     const navigate = useNavigate();
 
-    // Check user role from localStorage on mount
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const userRole = localStorage.getItem("role") || user.role;
@@ -68,6 +62,21 @@ function Catalog() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleUrlChange = (index, value) => {
+        const newUrls = [...contentImageUrls];
+        newUrls[index] = value;
+        setContentImageUrls(newUrls);
+    };
+
+    const addUrlField = () => {
+        setContentImageUrls([...contentImageUrls, ""]);
+    };
+
+    const removeUrlField = (index) => {
+        const newUrls = contentImageUrls.filter((_, i) => i !== index);
+        setContentImageUrls(newUrls.length > 0 ? newUrls : [""]);
+    };
+
     const handleOpenCreateModal = () => {
         setIsEditing(false);
         setFormData({ 
@@ -75,14 +84,14 @@ function Catalog() {
             description: "", 
             category: "", 
             coverImageUrl: "", 
-            contentImageUrls: "", 
             totalPages: 1, 
             status: "Published" 
         });
+        setContentImageUrls([""]);
         setCoverImageFile(null);
         setContentImageFiles([]);
         setCoverMode("file");
-        setContentMode("url");
+        setContentMode("file");
         setIsModalOpen(true);
     };
 
@@ -91,19 +100,22 @@ function Catalog() {
         setIsEditing(true);
         setCurrentId(item._id);
         
-        const formattedContentUrls = Array.isArray(item.contentImageUrls) 
-            ? item.contentImageUrls.join(", ") 
-            : (item.contentImageUrls || "");
+        let urls = [""];
+        if (Array.isArray(item.contentImageUrls) && item.contentImageUrls.length > 0) {
+            urls = item.contentImageUrls;
+        } else if (typeof item.contentImageUrls === "string" && item.contentImageUrls.trim() !== "") {
+            urls = item.contentImageUrls.split(",").map(u => u.trim());
+        }
 
         setFormData({
             name: item.name || "",
             description: item.description || "",
             category: item.category || "",
             coverImageUrl: item.coverImageUrl || "",
-            contentImageUrls: formattedContentUrls,
             totalPages: item.totalPages || 1,
             status: item.status || "Published"
         });
+        setContentImageUrls(urls);
         setCoverImageFile(null);
         setContentImageFiles([]);
         setCoverMode("url");
@@ -111,7 +123,6 @@ function Catalog() {
         setIsModalOpen(true);
     };
 
-    // Submit form safely using FormData
     const handleSubmitForm = async (e) => {
         e.preventDefault();
         
@@ -122,20 +133,19 @@ function Catalog() {
         data.append("totalPages", formData.totalPages || 1);
         data.append("status", formData.status || "Published");
 
-        // Handle Cover Image (File vs URL)
         if (coverMode === "file" && coverImageFile) {
             data.append("coverImage", coverImageFile);
         } else {
             data.append("coverImageUrl", formData.coverImageUrl || "");
         }
 
-        // Handle Content Pages (Multiple Files vs URL text)
         if (contentMode === "file" && contentImageFiles.length > 0) {
             for (let i = 0; i < contentImageFiles.length; i++) {
                 data.append("contentImages", contentImageFiles[i]);
             }
         } else {
-            data.append("contentImageUrls", formData.contentImageUrls || "");
+            const validUrls = contentImageUrls.filter(u => u.trim() !== "");
+            data.append("contentImageUrls", validUrls.join(", "));
         }
 
         try {
@@ -184,7 +194,7 @@ function Catalog() {
                 <div className="catalog-header">
                     <div>
                         <h1>{isAdmin ? "Admin Library Catalog Management" : "Library Catalog"}</h1>
-                        <p>{isAdmin ? "Manage publications using URLs or direct multi-image page uploads" : "Browse available publications in the library collection"}</p>
+                        <p>{isAdmin ? "Manage publications using multiple URLs or direct multi-image page uploads" : "Browse available publications in the library collection"}</p>
                     </div>
                     <div className="catalog-header-actions">
                         {isAdmin && (
@@ -297,15 +307,15 @@ function Catalog() {
                         <form onSubmit={handleSubmitForm}>
                             <div className="form-group">
                                 <label>Title:</label>
-                                <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                                <input type="text" name="name" maxLength={40} value={formData.name} onChange={handleChange} required />
                             </div>
                             <div className="form-group">
                                 <label>Description:</label>
-                                <textarea name="description" value={formData.description} onChange={handleChange} rows="2" required />
+                                <textarea name="description"  value={formData.description} onChange={handleChange} rows="2" required />
                             </div>
                             <div className="form-group">
                                 <label>Category:</label>
-                                <input type="text" name="category" value={formData.category} onChange={handleChange} required />
+                                <input type="text" name="category" maxLength={40} value={formData.category} onChange={handleChange} required />
                             </div>
                             
                             {/* Cover Image Input Option */}
@@ -328,11 +338,13 @@ function Catalog() {
                                         placeholder="https://example.com/cover.jpg" 
                                     />
                                 ) : (
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={(e) => setCoverImageFile(e.target.files[0])} 
-                                    />
+                                    <div className="file-upload-wrapper">
+                                        <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            onChange={(e) => setCoverImageFile(e.target.files[0])} 
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -344,30 +356,66 @@ function Catalog() {
                                         style={{ fontSize: "0.75rem", color: "#ffb703", cursor: "pointer", textDecoration: "underline" }}
                                         onClick={() => setContentMode(contentMode === "url" ? "file" : "url")}
                                     >
-                                        Switch to {contentMode === "url" ? "Multiple File Upload" : "URL Links"}
+                                        Switch to {contentMode === "url" ? "Multiple File Upload" : "Multiple URLs"}
                                     </span>
                                 </div>
+
                                 {contentMode === "url" ? (
-                                    <input 
-                                        type="text" 
-                                        name="contentImageUrls" 
-                                        value={formData.contentImageUrls} 
-                                        onChange={handleChange} 
-                                        placeholder="Comma-separated image URLs" 
-                                    />
+                                    <div>
+                                        {contentImageUrls.map((url, index) => (
+                                            <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                                                <input 
+                                                    type="text" 
+                                                    value={url} 
+                                                    onChange={(e) => handleUrlChange(index, e.target.value)} 
+                                                    placeholder={`Page ${index + 1} Image URL`} 
+                                                    style={{ flex: 1 }}
+                                                />
+                                                {contentImageUrls.length > 1 && (
+                                                    typeButton(index, removeUrlField)
+                                                )}
+                                            </div>
+                                        ))}
+                                        <button 
+                                            type="button" 
+                                            onClick={addUrlField}
+                                            style={{
+                                                background: "transparent",
+                                                color: "#ffb703",
+                                                border: "1px dashed #ffb703",
+                                                padding: "6px 12px",
+                                                borderRadius: "4px",
+                                                cursor: "pointer",
+                                                fontSize: "0.85rem",
+                                                marginTop: "4px",
+                                                width: "100%"
+                                            }}
+                                        >
+                                            + Add Another URL
+                                        </button>
+                                    </div>
                                 ) : (
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        multiple 
-                                        onChange={(e) => setContentImageFiles(e.target.files)} 
-                                    />
+                                    <div>
+                                        <div className="file-upload-wrapper">
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                multiple 
+                                                onChange={(e) => setContentImageFiles(e.target.files)} 
+                                            />
+                                        </div>
+                                        {contentImageFiles.length > 0 && (
+                                            <small style={{ display: "block", marginTop: "5px", color: "#ffb703" }}>
+                                                {contentImageFiles.length} file(s) selected for upload
+                                            </small>
+                                        )}
+                                    </div>
                                 )}
                             </div>
 
                             <div className="form-group">
                                 <label>Total Pages:</label>
-                                <input type="number" name="totalPages" value={formData.totalPages} onChange={handleChange} min="1" required />
+                                <input type="number" name="totalPages" maxLength={10} value={formData.totalPages} onChange={handleChange} min="1" required />
                             </div>
                             <div className="form-group">
                                 <label>Status:</label>
@@ -386,6 +434,26 @@ function Catalog() {
                 </div>
             )}
         </div>
+    );
+}
+
+function typeButton(index, removeUrlField) {
+    return (
+        <button 
+            type="button" 
+            onClick={() => removeUrlField(index)}
+            style={{
+                background: "#2a2a2a",
+                border: "none",
+                color: "#ff6b6b",
+                padding: "0 10px",
+                borderRadius: "4px",
+                cursor: "pointer"
+            }}
+            title="Remove URL"
+        >
+            ✕
+        </button>
     );
 }
 
