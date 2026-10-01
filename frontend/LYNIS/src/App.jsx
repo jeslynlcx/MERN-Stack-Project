@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router"
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -8,7 +7,6 @@ import Catalog from './pages/Catalog'
 import Book from './pages/Book'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
-import BookReader from './components/BookReader'
 
 function App() {
 

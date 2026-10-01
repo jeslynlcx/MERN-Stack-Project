@@ -29,6 +29,7 @@ const corsHandler = cors ({
 
 app.use(corsHandler)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use(express.static('public'))
 app.use("/users", UserRoute)
 app.use("/contents", ContentRoute)
 app.use("/categories", CategoryRoute)

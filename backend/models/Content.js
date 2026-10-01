@@ -27,12 +27,6 @@ const ContentSchema = new Schema ({
       required: true,
       min: 1,
     },
-    averageRating: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5,
-    },
     status: {
       type: String,
       enum: ['Draft', 'Published', 'Archived'],

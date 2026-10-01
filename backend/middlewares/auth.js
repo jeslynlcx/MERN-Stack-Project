@@ -5,7 +5,6 @@ exports.authenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
-        // Safely check if authHeader exists and is a string
         if (!authHeader || typeof authHeader !== 'string') {
             return res.status(401).json({
                 error: "Authorization token is missing"
