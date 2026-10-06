@@ -1,5 +1,4 @@
-/* Base Layout Wrapper */
-.login-wrapper {
+/* .login-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -13,7 +12,6 @@
     padding: 20px;
 }
 
-/* Card Container for Forms and Intro Boxes */
 .login-card {
     background-color: #1a1a1e;
     border: 1px solid #2a2a2e;
@@ -32,7 +30,6 @@
     color: #f3f4f6;
 }
 
-/* Form Group Layout */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -61,7 +58,6 @@
     border-color: #4f46e5;
 }
 
-/* Buttons */
 .login-btn {
     width: 100%;
     padding: 11px;
@@ -95,4 +91,4 @@
 .register-btn:hover {
     background-color: #27272a;
     color: #ffffff;
-}
+} */

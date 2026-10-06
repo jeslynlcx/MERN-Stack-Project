@@ -6,7 +6,7 @@ function HomePage() {
     const navigate = useNavigate();
 
     return (
-        <div className="login-wrapper home-wrapper">
+        <div className="home-wrapper">
             <Navbar/>
             <div className="hero-section">
                 <h1 className="hero-title">Digital Books and Magazine</h1>
@@ -15,7 +15,7 @@ function HomePage() {
                 </p>
                 <button 
                     onClick={() => navigate("/bookshelf")} 
-                    className="login-btn hero-cta"
+                    className="hero-cta"
                 >
                     Open Bookshelf Cabinet
                 </button>

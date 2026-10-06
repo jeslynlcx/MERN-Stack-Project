@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar'
 import './Dashboard.css'
 
 function Dashboard() {
-    const [users,setUsers] = useState([])
+    const [users, setUsers] = useState([])
     const [search, setSearch] = useState("")
     const [loading,setLoading] = useState(true)
     const [error, setError] = useState(null)

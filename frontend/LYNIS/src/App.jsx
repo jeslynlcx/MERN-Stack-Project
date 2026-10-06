@@ -3,8 +3,9 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
 import Bookshelf from './pages/Bookshelf'
+import BookReader from './components/BookReader'
 import Catalog from './pages/Catalog'
-import Book from './pages/Book'
+// import Book from './pages/Book'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 
@@ -17,8 +18,9 @@ function App() {
         <Route path='/register' element={<Register/>} /> 
         <Route path='/home' element={<Home/>} />
         <Route path='/bookshelf' element={<Bookshelf/>} />
+        <Route path="/content/:id" element={<BookReader />} />
         <Route path='/catalog' element={<Catalog/>} />
-        <Route path="/book" element={<Book />} />
+        {/* <Route path="/book" element={<Book />} /> */}
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/profile' element={<Profile />} />
       </Routes>
