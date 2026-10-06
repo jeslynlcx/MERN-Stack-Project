@@ -27,6 +27,7 @@ const corsHandler = cors ({
     preflightContinue: true
 })
 
+app.use(cors())
 app.use(corsHandler)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use(express.static('public'))
