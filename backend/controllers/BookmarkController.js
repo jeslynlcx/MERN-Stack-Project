@@ -2,10 +2,12 @@ const Bookmark = require('../models/Bookmark')
 
 exports.getAllBookmarks = async (req, res) => {
     try {
-        const bookmarks = await Bookmark.find({}).populate('contentId')
-        res.json(bookmarks)
+        const { contentId } = req.query;
+        const query = contentId ? { contentId } : { userId: req.user?.id || req.user?._id };
+        const bookmarks = await Bookmark.find(query).populate('contentId').populate('userId', 'username');
+        res.json(bookmarks);
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        res.status(500).json({ error: error.message });
     }
 }
 

@@ -18,3 +18,14 @@ exports.addLog = async (req, res) => {
         res.status(400).json({ error: error.message })
     }
 }
+
+exports.deleteLog = async (req, res) => {
+    try {
+        const { id } = req.params
+        const deleted = await ActivityLog.findByIdAndDelete({ _id: id })
+        if (!deleted) return res.status(404).json({ error: "Comments not found" })
+        res.status(204).send()
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}

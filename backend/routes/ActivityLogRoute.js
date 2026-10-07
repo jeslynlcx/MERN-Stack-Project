@@ -7,5 +7,6 @@ router.use(express.json())
 
 router.get("/", auth.authenticate, ActivityLogController.getAllLogs)
 router.post("/", auth.authenticate, ActivityLogController.addLog)
+router.delete("/:id", auth.authenticate, ActivityLogController.deleteLog)
 
 module.exports = router

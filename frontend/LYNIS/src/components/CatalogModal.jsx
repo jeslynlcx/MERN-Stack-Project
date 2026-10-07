@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import './CatalogModal.css';
 
 export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) => {
-    const [coverMode, setCoverMode] = useState("file");
-    const [contentMode, setContentMode] = useState("file");
-
+    const [cover, setCover] = useState("file");
+    const [content, setContent] = useState("file");
+    const [coverImageFile, setCoverImageFile] = useState(null);
+    const [imageUrl, setImageUrl] = useState([""]);
+    const [imageFile, setImageFile] = useState([]);
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -13,47 +16,43 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
         status: "Published"
     });
 
-    const [contentImageUrls, setContentImageUrls] = useState([""]);
-    const [coverImageFile, setCoverImageFile] = useState(null);
-    const [contentImageFiles, setContentImageFiles] = useState([]);
-
     useEffect(() => {
-        if (isOpen) {
-            if (editingItem) {
-                let urls = [""];
-                if (Array.isArray(editingItem.contentImageUrls) && editingItem.contentImageUrls.length > 0) {
-                    urls = editingItem.contentImageUrls;
-                } else if (typeof editingItem.contentImageUrls === "string" && editingItem.contentImageUrls.trim() !== "") {
-                    urls = editingItem.contentImageUrls.split(",").map(u => u.trim());
-                }
+        if (!isOpen) return;
 
-                setFormData({
-                    name: editingItem.name || "",
-                    description: editingItem.description || "",
-                    category: editingItem.category || "",
-                    coverImageUrl: editingItem.coverImageUrl || "",
-                    totalPages: editingItem.totalPages || 1,
-                    status: editingItem.status || "Published"
-                });
-                setContentImageUrls(urls);
-                setCoverMode("url");
-                setContentMode("url");
-            } else {
-                setFormData({
-                    name: "",
-                    description: "",
-                    category: "",
-                    coverImageUrl: "",
-                    totalPages: 1,
-                    status: "Published"
-                });
-                setContentImageUrls([""]);
-                setCoverMode("file");
-                setContentMode("file");
+        if (editingItem) {
+            let urls = [""];
+            if (Array.isArray(editingItem.imageUrl) && editingItem.imageUrl.length > 0) {
+                urls = editingItem.imageUrl;
+            } else if (typeof editingItem.imageUrl === "string" && editingItem.imageUrl.trim() !== "") {
+                urls = editingItem.imageUrl.split(",").map(urlItem => urlItem.trim());
             }
-            setCoverImageFile(null);
-            setContentImageFiles([]);
+
+            setFormData({
+                name: editingItem.name || "",
+                description: editingItem.description || "",
+                category: editingItem.category || "",
+                coverImageUrl: editingItem.coverImageUrl || "",
+                totalPages: editingItem.totalPages || 1,
+                status: editingItem.status || "Published"
+            });
+            setImageUrl(urls);
+            setCover("url");
+            setContent("url");
+        } else {
+            setFormData({
+                name: "",
+                description: "",
+                category: "",
+                coverImageUrl: "",
+                totalPages: 1,
+                status: "Published"
+            });
+            setImageUrl([""]);
+            setCover("file");
+            setContent("file");
         }
+        setCoverImageFile(null);
+        setImageFile([]);
     }, [isOpen, editingItem]);
 
     if (!isOpen) return null;
@@ -63,60 +62,59 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
     };
 
     const handleUrlChange = (index, value) => {
-        const newUrls = [...contentImageUrls];
-        newUrls[index] = value;
-        setContentImageUrls(newUrls);
+        const updatedUrls = [...imageUrl];
+        updatedUrls[index] = value;
+        setImageUrl(updatedUrls);
     };
 
-    const addUrlField = () => setContentImageUrls([...contentImageUrls, ""]);
+    //--------------Content post by URL--------------
+    const addUrlField = () => setImageUrl([...imageUrl, ""]);
 
     const removeUrlField = (index) => {
-        const newUrls = contentImageUrls.filter((_, i) => i !== index);
-        setContentImageUrls(newUrls.length ? newUrls : [""]);
+        const updatedUrls = imageUrl.filter((_, itemIndex) => itemIndex !== index);
+        setImageUrl(updatedUrls.length ? updatedUrls : [""]);
     };
 
-    // Bulk batch selector: sorts incoming files alphabetically/chronologically to keep ascending order
     const handleFilesBulkSelect = (e) => {
         const selectedFiles = Array.from(e.target.files);
         if (selectedFiles.length > 0) {
-            // Sort by file name or natural order to prevent descending inversion
-            selectedFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-            setContentImageFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+            selectedFiles.sort((firstFile, secondFile) => firstFile.name.localeCompare(secondFile.name, undefined, { numeric: true, sensitivity: 'base' }));
+            setImageFile(previousFiles => [...previousFiles, ...selectedFiles]);
         }
     };
 
-    const addFileField = () => setContentImageFiles([...contentImageFiles, null]);
+    //--------------Content post by image file--------------
+    const addFileField = () => setImageFile([...imageFile, null]);
 
     const removeFileField = (index) => {
-        const newFiles = contentImageFiles.filter((_, i) => i !== index);
-        setContentImageFiles(newFiles);
+        const updatedFiles = imageFile.filter((_, itemIndex) => itemIndex !== index);
+        setImageFile(updatedFiles);
     };
 
     const handleSingleFileChange = (index, file) => {
-        const newFiles = [...contentImageFiles];
-        newFiles[index] = file;
-        setContentImageFiles(newFiles);
+        const updatedFiles = [...imageFile];
+        updatedFiles[index] = file;
+        setImageFile(updatedFiles);
     };
 
+    //--------------POST--------------
     const handleSubmit = (e) => {
         e.preventDefault();
         const data = new FormData();
-        
-        Object.entries(formData).forEach(([key, val]) => data.append(key, val));
 
-        if (coverMode === "file" && coverImageFile) {
+        Object.entries(formData).forEach(([key, val]) => data.append(key, val)); //take all input from formData into FormData
+        if (cover === "file" && coverImageFile) {  //handling cover 
             data.append("coverImage", coverImageFile);
         }
-
-        if (contentMode === "file") {
-            const validFiles = contentImageFiles.filter(file => file !== null && file !== undefined);
-            validFiles.forEach(file => data.append("contentImages", file));
+        if (content === "file") {  //handling content
+            const validFiles = imageFile.filter(file => file !== null && file !== undefined); //for image mode
+            validFiles.forEach(file => data.append("contentImages", file)); //filter out empty slot if edit deleted, for each loop pack them into FormData to backend
         } else {
-            const validUrls = contentImageUrls.filter(u => u.trim() !== "");
-            data.append("contentImageUrls", validUrls.join(", "));
+            const validUrls = imageUrl.filter(urlItem => urlItem.trim() !== "");  //for url mode
+            data.append("imageUrl", validUrls.join(", ")); //filter out empty slot, trim make sure spaces dont count as text. join all url into long string saparate by ,
         }
 
-        onSave(data, editingItem ? editingItem._id : null);
+        onSave(data, editingItem ? editingItem._id : null); //Check whether its existing it passed into _id, otherwise passed null create new 
     };
 
     return (
@@ -138,16 +136,16 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                     </div>
                     
                     <div className="form-group">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <label style={{ margin: 0 }}>Cover Image:</label>
+                        <div className="header">
+                            <label className="sub-label">Cover Image:</label>
                             <span 
-                                style={{ fontSize: "0.75rem", color: "#ffb703", cursor: "pointer", textDecoration: "underline" }}
-                                onClick={() => setCoverMode(coverMode === "url" ? "file" : "url")}
+                                className="mode-switch-toggle"
+                                onClick={() => setCover(cover === "url" ? "file" : "url")}
                             >
-                                Switch to {coverMode === "url" ? "File Upload" : "URL Link"}
+                                Switch to {cover === "url" ? "File Upload" : "URL Link"}
                             </span>
                         </div>
-                        {coverMode === "url" ? (
+                        {cover === "url" ? (
                             <input 
                                 type="text" 
                                 name="coverImageUrl" 
@@ -167,39 +165,32 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                     </div>
 
                     <div className="form-group">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <label style={{ margin: 0 }}>Content Pages / Images:</label>
+                        <div className="header">
+                            <label className="sub-label">Content Pages / Images:</label>
                             <span 
-                                style={{ fontSize: "0.75rem", color: "#ffb703", cursor: "pointer", textDecoration: "underline" }}
-                                onClick={() => setContentMode(contentMode === "url" ? "file" : "url")}
+                                className="mode-switch-toggle"
+                                onClick={() => setContent(content === "url" ? "file" : "url")}
                             >
-                                Switch to {contentMode === "url" ? "Multiple File Upload" : "Multiple URLs"}
+                                Switch to {content === "url" ? "Multiple File Upload" : "Multiple URLs"}
                             </span>
                         </div>
 
-                        {contentMode === "url" ? (
+                        {content === "url" ? (
                             <div>
-                                {contentImageUrls.map((url, index) => (
-                                    <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                                {imageUrl.map((url, index) => (
+                                    <div key={index} className="url-row">
                                         <input 
                                             type="text" 
                                             value={url} 
                                             onChange={(e) => handleUrlChange(index, e.target.value)} 
                                             placeholder={`Page ${index + 1} Image URL`} 
-                                            style={{ flex: 1 }}
+                                            className="url-input"
                                         />
-                                        {contentImageUrls.length > 1 && (
+                                        {imageUrl.length > 1 && (
                                             <button 
                                                 type="button" 
                                                 onClick={() => removeUrlField(index)}
-                                                style={{
-                                                    background: "#2a2a2a",
-                                                    border: "none",
-                                                    color: "#ff6b6b",
-                                                    padding: "0 10px",
-                                                    borderRadius: "4px",
-                                                    cursor: "pointer"
-                                                }}
+                                                className="remove-url"
                                                 title="Remove URL"
                                             >
                                                 ✕
@@ -210,26 +201,16 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                                 <button 
                                     type="button" 
                                     onClick={addUrlField}
-                                    style={{
-                                        background: "transparent",
-                                        color: "#ffb703",
-                                        border: "1px dashed #ffb703",
-                                        padding: "6px 12px",
-                                        borderRadius: "4px",
-                                        cursor: "pointer",
-                                        fontSize: "0.85rem",
-                                        marginTop: "4px",
-                                        width: "100%"
-                                    }}
+                                    className="add-btn"
                                 >
                                     + Add Another URL
                                 </button>
                             </div>
                         ) : (
                             <div>
-                                {contentImageFiles.map((file, index) => (
-                                    <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center", background: "#1a1a1a", padding: "6px", borderRadius: "4px", border: "1px solid #333" }}>
-                                        <div style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.85rem", color: "#ddd", paddingLeft: "4px" }}>
+                                {imageFile.map((file, index) => (
+                                    <div key={index} className="file-row">
+                                        <div className="file-row-name">
                                             {file ? file.name : (
                                                 <input 
                                                     type="file" 
@@ -241,14 +222,7 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                                         <button 
                                             type="button" 
                                             onClick={() => removeFileField(index)}
-                                            style={{
-                                                background: "#2a2a2a",
-                                                border: "none",
-                                                color: "#ff6b6b",
-                                                padding: "6px 10px",
-                                                borderRadius: "4px",
-                                                cursor: "pointer"
-                                            }}
+                                            className="remove-image"
                                             title="Remove File"
                                         >
                                             ✕
@@ -256,40 +230,21 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                                     </div>
                                 ))}
 
-                                <div style={{ display: "flex", gap: "8px" }}>
-                                    <label style={{
-                                        flex: 1,
-                                        background: "transparent",
-                                        color: "#ffb703",
-                                        border: "1px dashed #ffb703",
-                                        padding: "8px 12px",
-                                        borderRadius: "4px",
-                                        cursor: "pointer",
-                                        fontSize: "0.85rem",
-                                        textAlign: "center",
-                                        display: "block"
-                                    }}>
+                                <div className="file-action-buttons">
+                                    <label className="multi-file">
                                         📁 Select Multiple Files at Once
                                         <input 
                                             type="file" 
                                             accept="image/*" 
                                             multiple 
                                             onChange={handleFilesBulkSelect} 
-                                            style={{ display: "none" }} 
+                                            className="hidden-file-input" 
                                         />
                                     </label>
                                     <button 
                                         type="button" 
                                         onClick={addFileField}
-                                        style={{
-                                            background: "transparent",
-                                            color: "#ffb703",
-                                            border: "1px dashed #ffb703",
-                                            padding: "8px 12px",
-                                            borderRadius: "4px",
-                                            cursor: "pointer",
-                                            fontSize: "0.85rem"
-                                        }}
+                                        className="file-action addRow-btn"
                                     >
                                         + Add Blank Row
                                     </button>
