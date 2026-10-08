@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../utils/api";
 import Navbar from "../components/Navbar";
 import Book from "../components/BookModal";
-import "./Bookshelf.css";
+import "../styles/Bookshelf.css";
 
 function Bookshelf() {
     const [contents, setContents] = useState([]);

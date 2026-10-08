@@ -9,13 +9,13 @@ const ActivityLogSchema = new Schema ({
     action: {
         type: String,
         required: true,
-        enum: ['USER_LOGIN', 'BOOK_PUBLISHED', 'BOOK_UPDATED', 'COMMENT_DELETED', 'FEEDBACK_REVIEWED'],
+        enum: ['REPORT','FEEDBACK_REVIEWED','OTHER']
     },
     details: {
         type: String,
         required: true 
     }
-})
+},{timestamps: true})
 
 const ActivityLog = model("ActivityLog", ActivityLogSchema)
 module.exports = ActivityLog

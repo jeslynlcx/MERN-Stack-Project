@@ -54,6 +54,7 @@ function Book({ book, onClose }) {
                         const isOwner = commentUserId === userId
                         return {
                             id: bookmark._id,
+                            userId: commentUserId,
                             user: isOwner ? "You" : (bookmark.userId?.username || "Community User"),
                             text: bookmark.comment,
                             date: "Community",
@@ -66,12 +67,19 @@ function Book({ book, onClose }) {
             .catch(error => console.error("Error fetching bookmarks:", error))
     }, [book._id])
 
+    // Always include current isLiked and userRating so saving/updating never wipes them out
     const saveBookmark = async (updateData) => {
         const { token, userId } = fetchTokenData()
         if (!token) return
 
         try {
-            await api.post("/bookmarks", { userId, contentId: book._id, ...updateData }, {
+            await api.post("/bookmarks", { 
+                userId, 
+                contentId: book._id, 
+                isLiked, 
+                rating: userRating, 
+                ...updateData 
+            }, {
                 headers: { Authorization: `Bearer ${token}` }
             })
         } catch (error) {
@@ -86,8 +94,10 @@ function Book({ book, onClose }) {
     }
 
     const handleRating = (score) => {
-        setUserRating(score)
-        saveBookmark({ rating: score })
+        // If the user clicks the 1st star and it's already set to 1, clear it to 0. Otherwise set to score.
+        const newScore = (userRating === 1 && score === 1) ? 0 : score
+        setUserRating(newScore)
+        saveBookmark({ rating: newScore })
     }
 
     const handleAddComment = (e) => {
@@ -100,15 +110,29 @@ function Book({ book, onClose }) {
         saveBookmark({ comment: commentText })
     }
 
-    const handleDeleteComment = async (bookmarkId) => {
-        const { token } = fetchTokenData()
+    const handleDeleteComment = async (commentItem) => {
+        const { token, userId } = fetchTokenData()
         if (!token) return
 
         try {
-            await api.delete(`/bookmarks/${bookmarkId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-            setComments(comments.filter(comment => comment.id !== bookmarkId))
+            if (commentItem.isOwner) {
+                // Clear the comment string while keeping current like and rating intact
+                await api.post("/bookmarks", {
+                    userId,
+                    contentId: book._id,
+                    isLiked,
+                    rating: userRating,
+                    comment: ""
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            } else if (isAdmin) {
+                // If admin deletes someone else's comment, call delete on that specific bookmark ID
+                await api.delete(`/bookmarks/${commentItem.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            }
+            setComments(comments.filter(c => c.id !== commentItem.id))
         } catch (error) {
             console.error("Failed to delete comment:", error.response?.data || error.message)
             alert("You may not have permission to delete this comment.")
@@ -178,7 +202,7 @@ function Book({ book, onClose }) {
                                         <p className="comment-text">{commentItem.text}</p>
                                     </div>
                                     {(isAdmin || commentItem.isOwner) && (
-                                        <button className="comment-delete-btn" onClick={() => handleDeleteComment(commentItem.id)} title="Delete comment">
+                                        <button className="comment-delete-btn" onClick={() => handleDeleteComment(commentItem)} title="Delete comment">
                                             🗑️
                                         </button>
                                     )}

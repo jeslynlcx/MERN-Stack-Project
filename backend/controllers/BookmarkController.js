@@ -3,8 +3,14 @@ const Bookmark = require('../models/Bookmark')
 exports.getAllBookmarks = async (req, res) => {
     try {
         const { contentId } = req.query;
-        const query = contentId ? { contentId } : { userId: req.user?.id || req.user?._id };
-        const bookmarks = await Bookmark.find(query).populate('contentId').populate('userId', 'username');
+        let query = {};
+        if (contentId) { //if contentId is passed, filter by it.
+            query.contentId = contentId;
+        } else if (req.user?.role !== 'admin') { //if the user is an admin, fetch all bookmarks.
+            query.userId = req.user?.id || req.user?._id;
+        }
+
+        const bookmarks = await Bookmark.find(query).populate('contentId').populate('userId', 'username role');
         res.json(bookmarks);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -22,7 +28,6 @@ exports.getUserBookmarks = async (req, res) => {
 
 exports.updateReadingProgress = async (req, res) => {
     try {
-        // Destructure rating and comment right alongside the other fields
         const { userId, contentId, lastReadPage, isLiked, rating, comment } = req.body;
         
         const bookmark = await Bookmark.findOneAndUpdate(

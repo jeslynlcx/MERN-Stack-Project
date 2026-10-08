@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import api from "../utils/api";
 import Navbar from "../components/Navbar";
 import CatalogModal from "../components/CatalogModal";
-import "./Catalog.css";
+import "../styles/Catalog.css"
 
 function Catalog() {
     const [contents, setContents] = useState([]);
@@ -101,36 +101,36 @@ function Catalog() {
             <Navbar />
 
             <div className="catalog-workspace">
-                <div className="catalog-header">
+                <div className="header">
                     <div>
                         <h1>{isAdmin ? "Admin Library Catalog Management" : "Library Catalog"}</h1>
                         <p>{isAdmin ? "Manage publications using multiple URLs or direct multi-image page uploads" : "Browse available publications in the library collection"}</p>
                     </div>
-                    <div className="catalog-header-actions">
+                    <div className="header-actions">
                         {isAdmin && (
                             <button onClick={handleOpenCreateModal} className="catalog-add-btn">
                                 + Add Content
                             </button>
                         )}
-                        <div className="catalog-count-badge">
+                        <div className="count-badge">
                             Total Items: <strong>{filteredContents.length}</strong>
                         </div>
                     </div>
                 </div>
 
-                <div className="catalog-control-panel">
-                    <div className="catalog-search-box">
+                <div className="control-panel">
+                    <div className="search-box">
                         <span className="search-icon">🔍</span>
                         <input 
                             type="text" 
                             placeholder="Search content by title..." 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="catalog-search-input"
+                            className="search-input"
                         />
                     </div>
 
-                    <div className="catalog-filter-group">
+                    <div className="filter-group">
                         <label>Category Filter:</label>
                         <select 
                             value={selectedCategory} 
@@ -144,7 +144,7 @@ function Catalog() {
                     </div>
                 </div>
 
-                <div className="catalog-table-container">
+                <div className="table-container">
                     {loading && <p className="loading">Loading...</p>}
 
                     {error && <p className="error">{error}</p>}
@@ -153,7 +153,7 @@ function Catalog() {
                         filteredContents.length === 0 ? (
                             <div className="catalog-status-message">No records found matching your search criteria.</div>
                         ) : (
-                            <table className="catalog-table">
+                            <table className="table">
                                 <thead>
                                     <tr>
                                         <th>Cover</th>
@@ -176,28 +176,28 @@ function Catalog() {
                                                 />
                                             </td>
                                             <td>
-                                                <span className="item-main-title">{item.name}</span>
-                                                <span className="item-sub-desc">{item.description?.substring(0, 60)}...</span>
+                                                <span className="title">{item.name}</span>
+                                                <span className="description">{item.description?.substring(0, 60)}...</span>
                                             </td>
                                             <td>
-                                                <span className="catalog-category-tag">{item.category}</span>
+                                                <span className="category-tag">{item.category}</span>
                                             </td>
                                             <td>{item.totalPages} pgs</td>
                                             <td>
-                                                <span className={`status-pill ${item.status?.toLowerCase() || 'published'}`}>
+                                                <span className={`status ${item.status?.toLowerCase() || 'published'}`}>
                                                     {item.status || "Published"}
                                                 </span>
                                             </td>
                                             {isAdmin && (
-                                                <td className="admin-actions-cell" onClick={(e) => e.stopPropagation()}>
+                                                <td className="admin-actions" onClick={(e) => e.stopPropagation()}>
                                                     <button 
-                                                        className="catalog-edit-btn"
+                                                        className="edit-btn"
                                                         onClick={(e) => handleOpenEditModal(item, e)}
                                                     >
                                                         Edit ✏️
                                                     </button>
                                                     <button 
-                                                        className="catalog-delete-btn"
+                                                        className="delete-btn"
                                                         onClick={(e) => handleDelete(item._id, e)}
                                                     >
                                                         Delete 🗑️

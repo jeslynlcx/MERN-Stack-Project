@@ -9,6 +9,17 @@ exports.getAllLogs = async (req, res) => {
     }
 }
 
+exports.getMyLogs = async (req, res) => {
+    try {
+        const userId = req.user.userId || req.user._id
+        const logs = await ActivityLog.find({ userId })
+            .sort({ createdAt: -1 }) // Newest first
+        res.json(logs)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
 exports.addLog = async (req, res) => {
     try {
         const newLog = new ActivityLog(req.body)
