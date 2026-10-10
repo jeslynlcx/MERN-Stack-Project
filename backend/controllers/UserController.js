@@ -36,14 +36,14 @@ exports.login = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
     try {
         if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).json({ error: "Access denied. Administrator privileges required." });
+            return res.status(403).json({ error: "Access denied. Administrator privileges required." })
         }
-        const users = await User.find().select('-password');
-        return res.status(200).json(users);
+        const users = await User.find().select('-password')
+        return res.status(200).json(users)
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message })
     }
-};
+}
 
 exports.getUsersById = async (req, res) => {
     try {

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
+import { Box, Typography, Button, TextField, Select, MenuItem } from '@mui/material'
 import api from '../utils/api'
 import Navbar from '../components/Navbar'
 import UserManage from '../components/adminDashboard/UserManage'
 import UserFeedback from '../components/adminDashboard/UserFeedback'
 import BookAnalytic from '../components/adminDashboard/BookAnalytic'
-import "../styles/Dashboard.css"
 
 function Dashboard() {
     const [users, setUsers] = useState([])
@@ -15,11 +15,8 @@ function Dashboard() {
     const [activeTab, setActiveTab] = useState("users") 
     const [search, setSearch] = useState("")
     const [bookSort, setBookSort] = useState("latest") 
-    
-    // [NEW] Feedback sort & filter states
-    const [feedbackSort, setFeedbackSort] = useState("latest") // default latest
-    const [actionFilter, setActionFilter] = useState("all")     // filter by action type
-
+    const [feedbackSort, setFeedbackSort] = useState("latest")
+    const [actionFilter, setActionFilter] = useState("all")
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const navigate = useNavigate()
@@ -67,146 +64,305 @@ function Dashboard() {
         : 'N/A'
 
     return (
-        <div className="admin-page-wrapper">
+        <Box sx={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            minHeight: "100vh", 
+            bgcolor: "#060504", 
+            color: "#f3f4f6", 
+            pb: "60px", 
+            overflowX: "hidden" 
+        }}>
             <Navbar />
-            <div className="admin-workspace">
-                <div className="admin-header">
-                    <div>
-                        <h1>Administrator Control Vault</h1>
-                        <p>Manage platform records, user directory memberships, and permissions</p>
-                    </div>
-                    <div className="admin-badge">Secure Admin Portal</div>
-                </div>
+            <Box sx={{ 
+                width: "100%", 
+                maxWidth: "1100px", 
+                mx: "20px", 
+                mt: "35px", 
+                display: "flex", 
+                flexDirection: "column" 
+            }}>
+                {/* Header */}
+                <Box sx={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "flex-start", 
+                    mb: "25px", 
+                    flexWrap: "wrap", 
+                    gap: "15px" 
+                }}>
+                    <Box>
+                        <Typography variant="h4" sx={{ fontSize: "2rem", m: "0 0 6px 0", color: "#fef3c7", fontWeight: 700, letterSpacing: "-0.5px" }}>
+                            Administrator Control Vault
+                        </Typography>
+                        <Typography sx={{ color: "#9ca3af", fontSize: "0.95rem", m: 0 }}>
+                            Manage platform records, user directory memberships, and permissions
+                        </Typography>
+                    </Box>
+                    <Box sx={{ 
+                        background: "linear-gradient(135deg, #b45309 0%, #78350f 100%)", 
+                        color: "#fef3c7", 
+                        fontSize: "0.75rem", 
+                        textTransform: "uppercase", 
+                        letterSpacing: "1px", 
+                        px: "14px", 
+                        py: "6px", 
+                        borderRadius: "20px", 
+                        fontWeight: 700, 
+                        border: "1px solid rgba(251, 191, 36, 0.3)", 
+                        boxShadow: "0 4px 15px rgba(180, 83, 9, 0.4)" 
+                    }}>
+                        Secure Admin Portal
+                    </Box>
+                </Box>
 
+                {/* Metrics Grid */}
                 {activeTab === 'users' && (
-                    <div className="admin-metrics-grid">
-                        <div className="metric-card">
-                            <span className="metric-title">TOTAL REGISTERED USERS</span>
-                            <span className="metric-value">{users.length}</span>
-                        </div>
-                        <div className="metric-card">
-                            <span className="metric-title">ADMINISTRATORS</span>
-                            <span className="metric-value">{users.filter(u => u.role === 'admin').length}</span>
-                        </div>
-                        <div className="metric-card">
-                            <span className="metric-title">STANDARD READERS</span>
-                            <span className="metric-value">{users.filter(u => u.role === 'user' || !u.role).length}</span>
-                        </div>
-                    </div>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", mb: "30px" }}>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>TOTAL REGISTERED USERS</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{users.length}</Typography>
+                        </Box>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>ADMINISTRATORS</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{users.filter(u => u.role === 'admin').length}</Typography>
+                        </Box>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>STANDARD READERS</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{users.filter(u => u.role === 'user' || !u.role).length}</Typography>
+                        </Box>
+                    </Box>
                 )}
 
                 {activeTab === 'feedback' && (
-                    <div className="admin-metrics-grid">
-                        <div className="metric-card">
-                            <span className="metric-title">TOTAL FEEDBACK LOGS</span>
-                            <span className="metric-value">{feedbackLogs.length}</span>
-                        </div>
-                        <div className="metric-card">
-                            <span className="metric-title">REPORT & ISSUE</span>
-                            <span className="metric-value">{reportLogs.length}</span>
-                        </div>
-                        <div className="metric-card">
-                            <span className="metric-title">TOTAL ACTIVITY RECORDS</span>
-                            <span className="metric-value">{logs.length}</span>
-                        </div>
-                    </div>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", mb: "30px" }}>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>TOTAL FEEDBACK LOGS</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{feedbackLogs.length}</Typography>
+                        </Box>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>REPORT & ISSUE</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{reportLogs.length}</Typography>
+                        </Box>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>TOTAL ACTIVITY RECORDS</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{logs.length}</Typography>
+                        </Box>
+                    </Box>
                 )}
 
                 {activeTab === 'books' && (
-                    <div className="admin-metrics-grid">
-                        <div className="metric-card">
-                            <span className="metric-title">TOTAL PUBLISHED BOOKS</span>
-                            <span className="metric-value">{books.length}</span>
-                        </div>
-                        <div className="metric-card">
-                            <span className="metric-title">TOTAL LIKES</span>
-                            <span className="metric-value" style={{ color: '#ffb703' }}>❤️ {totalLikesOverall}</span>
-                        </div>
-                        <div className="metric-card">
-                            <span className="metric-title">PLATFORM AVG RATING</span>
-                            <span className="metric-value" style={{ color: '#ffb703' }}>⭐ {avgRatingOverall}</span>
-                        </div>
-                    </div>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", mb: "30px" }}>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>TOTAL PUBLISHED BOOKS</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: "#fef3c7", fontWeight: 700 }}>{books.length}</Typography>
+                        </Box>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>TOTAL LIKES</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: '#ffb703', fontWeight: 700 }}>❤️ {totalLikesOverall}</Typography>
+                        </Box>
+                        <Box sx={{ background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", border: "1px solid rgba(217, 119, 6, 0.2)", borderRadius: "12px", p: "20px", display: "flex", flexDirection: "column", gap: "8px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" }}>
+                            <Typography sx={{ fontSize: "0.8rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>PLATFORM AVG RATING</Typography>
+                            <Typography sx={{ fontSize: "1.8rem", color: '#ffb703', fontWeight: 700 }}>⭐ {avgRatingOverall}</Typography>
+                        </Box>
+                    </Box>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0 15px 0', gap: '15px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={() => { setActiveTab("users"); setSearch(""); }} style={{ padding: '10px 20px', backgroundColor: activeTab === 'users' ? '#b45309' : '#1a1a1e', color: '#fff', border: '1px solid #374151', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
+                {/* Toolbar */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '15px', gap: '15px', flexWrap: 'wrap' }}>
+                    <Box sx={{ display: 'flex', gap: '10px' }}>
+                        <Button 
+                            onClick={() => { setActiveTab("users"); setSearch(""); }} 
+                            sx={{ padding: '10px 20px', backgroundColor: activeTab === 'users' ? '#b45309' : '#1a1a1e', color: '#fff', border: '1px solid #374151', borderRadius: '6px', textTransform: 'none', fontWeight: '600', '&:hover': { backgroundColor: '#d97706' } }}
+                        >
                             👥 Manage Users
-                        </button>
-                        <button onClick={() => { setActiveTab("feedback"); setSearch(""); }} style={{ padding: '10px 20px', backgroundColor: activeTab === 'feedback' ? '#b45309' : '#1a1a1e', color: '#fff', border: '1px solid #374151', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
+                        </Button>
+                        <Button 
+                            onClick={() => { setActiveTab("feedback"); setSearch(""); }} 
+                            sx={{ padding: '10px 20px', backgroundColor: activeTab === 'feedback' ? '#b45309' : '#1a1a1e', color: '#fff', border: '1px solid #374151', borderRadius: '6px', textTransform: 'none', fontWeight: '600', '&:hover': { backgroundColor: '#d97706' } }}
+                        >
                             💬 User Feedback
-                        </button>
-                        <button onClick={() => { setActiveTab("books"); setSearch(""); }} style={{ padding: '10px 20px', backgroundColor: activeTab === 'books' ? '#b45309' : '#1a1a1e', color: '#fff', border: '1px solid #374151', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
+                        </Button>
+                        <Button 
+                            onClick={() => { setActiveTab("books"); setSearch(""); }} 
+                            sx={{ padding: '10px 20px', backgroundColor: activeTab === 'books' ? '#b45309' : '#1a1a1e', color: '#fff', border: '1px solid #374151', borderRadius: '6px', textTransform: 'none', fontWeight: '600', '&:hover': { backgroundColor: '#d97706' } }}
+                        >
                             📚 Book Analytics
-                        </button>
-                    </div>
+                        </Button>
+                    </Box>
 
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Right-aligned filters, sort, and search */}
+                    <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', ml: 'auto' }}>
                         {activeTab === 'books' && (
-                            <select 
-                                value={bookSort} 
-                                onChange={(e) => setBookSort(e.target.value)}
-                                className="admin-search-input"
-                                style={{ padding: '10px', cursor: 'pointer', backgroundColor: '#000710', color: '#fff', border: '1px solid #374151', borderRadius: '6px' }}
-                            >
-                                <option value="latest">Sort by: Latest Release</option>
-                                <option value="title">Sort by: Title (A-Z)</option>
-                                <option value="likes">Sort by: Highest Likes</option>
-                                <option value="rating">Sort by: Highest Rating</option>
-                                <option value="comments">Sort by: Most Comments</option>
-                            </select>
+                            <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap' }}>
+                                <Select 
+                                    value={bookSort} 
+                                    onChange={(e) => setBookSort(e.target.value)}
+                                    size="small"
+                                    MenuProps={{
+                                        PaperProps: {
+                                            sx: {
+                                                bgcolor: "#17110d",
+                                                color: "#f3f4f6",
+                                                border: "1px solid #321e11",
+                                                "& .MuiMenuItem-root": {
+                                                    fontSize: "0.9rem",
+                                                    color: "#ffffff",
+                                                    "&:hover": { bgcolor: "#b45309", color: "#fff" },
+                                                    "&.Mui-selected": { bgcolor: "#b45309 !important", color: "#fff" }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    sx={{
+                                        backgroundColor: '#000710',
+                                        color: '#ffffff',
+                                        border: '1px solid #374151',
+                                        borderRadius: '6px',
+                                        fontSize: '0.9rem',
+                                        minWidth: '200px',
+                                        ".MuiSelect-select": { color: "#ffffff" },
+                                        ".MuiOutlinedInput-notchedOutline": { border: "none" },
+                                        ".MuiSvgIcon-root": { color: "#9ca3af" }
+                                    }}
+                                >
+                                    <MenuItem value="latest">Sort by: Latest Release</MenuItem>
+                                    <MenuItem value="title">Sort by: Title (A-Z)</MenuItem>
+                                    <MenuItem value="likes">Sort by: Highest Likes</MenuItem>
+                                    <MenuItem value="rating">Sort by: Highest Rating</MenuItem>
+                                    <MenuItem value="comments">Sort by: Most Comment</MenuItem>
+                                </Select>
+
+                                <Box sx={{ width: '320px', bgcolor: '#0b0806', border: '1px solid #321e11', borderRadius: '8px', px: '12px', py: '4px', '& input::placeholder': { color: '#9ca3af', opacity: 1 }, '& .MuiInput-input': { color: '#ffffff !important' } }}>
+                                    <TextField 
+                                        variant="standard"
+                                        placeholder="Search book title..." 
+                                        value={search} 
+                                        onChange={(e) => setSearch(e.target.value)} 
+                                        InputProps={{ disableUnderline: true }}
+                                        inputProps={{ style: { color: "#ffffff", fontSize: "0.9rem" } }}
+                                        fullWidth
+                                    />
+                                </Box>
+                            </Box>
                         )}
 
-                        {/* [NEW] Feedback Sort and Action Type Filter Dropdowns */}
                         {activeTab === 'feedback' && (
-                            <>
-                                <select 
+                            <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap' }}>
+                                <Select 
                                     value={feedbackSort} 
                                     onChange={(e) => setFeedbackSort(e.target.value)}
-                                    className="admin-search-input"
-                                    style={{ padding: '10px', cursor: 'pointer', backgroundColor: '#000710', color: '#fff', border: '1px solid #374151', borderRadius: '6px' }}
+                                    size="small"
+                                    MenuProps={{
+                                        PaperProps: {
+                                            sx: {
+                                                bgcolor: "#17110d",
+                                                color: "#f3f4f6",
+                                                border: "1px solid #321e11",
+                                                "& .MuiMenuItem-root": {
+                                                    fontSize: "0.9rem",
+                                                    color: "#ffffff",
+                                                    "&:hover": { bgcolor: "#b45309", color: "#fff" },
+                                                    "&.Mui-selected": { bgcolor: "#b45309 !important", color: "#fff" }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    sx={{
+                                        backgroundColor: '#000710',
+                                        color: '#ffffff',
+                                        border: '1px solid #374151',
+                                        borderRadius: '6px',
+                                        fontSize: '0.9rem',
+                                        minWidth: '350px',
+                                        ".MuiSelect-select": { color: "#ffffff" },
+                                        ".MuiOutlinedInput-notchedOutline": { border: "none" },
+                                        ".MuiSvgIcon-root": { color: "#9ca3af" }
+                                    }}
                                 >
-                                    <option value="latest">Sort: Latest (Default)</option>
-                                    <option value="oldest">Sort: Oldest First</option>
-                                    <option value="user">Sort by: User (A-Z)</option>
-                                </select>
+                                    <MenuItem value="latest">Sort: Latest (Default)</MenuItem>
+                                    <MenuItem value="oldest">Sort: Oldest First</MenuItem>
+                                    <MenuItem value="user">Sort by: User (A-Z)</MenuItem>
+                                </Select>
 
-                                <select 
+                                <Select 
                                     value={actionFilter} 
                                     onChange={(e) => setActionFilter(e.target.value)}
-                                    className="admin-search-input"
-                                    style={{ padding: '10px', cursor: 'pointer', backgroundColor: '#000710', color: '#fff', border: '1px solid #374151', borderRadius: '6px' }}
+                                    size="small"
+                                    MenuProps={{
+                                        PaperProps: {
+                                            sx: {
+                                                bgcolor: "#17110d",
+                                                color: "#f3f4f6",
+                                                border: "1px solid #321e11",
+                                                "& .MuiMenuItem-root": {
+                                                    fontSize: "0.9rem",
+                                                    color: "#ffffff",
+                                                    "&:hover": { bgcolor: "#b45309", color: "#fff" },
+                                                    "&.Mui-selected": { bgcolor: "#b45309 !important", color: "#fff" }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    sx={{
+                                        backgroundColor: '#000710',
+                                        color: '#ffffff',
+                                        border: '1px solid #374151',
+                                        borderRadius: '6px',
+                                        fontSize: '0.9rem',
+                                        minWidth: '350px',
+                                        ".MuiSelect-select": { color: "#ffffff" },
+                                        ".MuiOutlinedInput-notchedOutline": { border: "none" },
+                                        ".MuiSvgIcon-root": { color: "#9ca3af" }
+                                    }}
                                 >
-                                    <option value="all">Action Type: All</option>
-                                    <option value="FEEDBACK_REVIEWED">FEEDBACK_REVIEWED</option>
-                                    <option value="REPORT">REPORT & ISSUE</option>
-                                    <option value="OTHER">OTHER</option>
-                                </select>
-                            </>
+                                    <MenuItem value="all">Action Type: All</MenuItem>
+                                    <MenuItem value="FEEDBACK_REVIEWED">FEEDBACK_REVIEWED</MenuItem>
+                                    <MenuItem value="REPORT">REPORT & ISSUE</MenuItem>
+                                    <MenuItem value="OTHER">OTHER</MenuItem>
+                                </Select>
+
+                                <Box sx={{ width: '350px', bgcolor: '#0b0806', border: '1px solid #321e11', borderRadius: '8px', px: '12px', py: '4px', '& input::placeholder': { color: '#9ca3af', opacity: 1 }, '& .MuiInput-input': { color: '#ffffff !important' } }}>
+                                    <TextField 
+                                        variant="standard"
+                                        placeholder="Search feedback details..." 
+                                        value={search} 
+                                        onChange={(e) => setSearch(e.target.value)} 
+                                        InputProps={{ disableUnderline: true }}
+                                        inputProps={{ style: { color: "#ffffff", fontSize: "0.9rem" } }}
+                                        fullWidth
+                                    />
+                                </Box>
+                            </Box>
                         )}
 
-                        <div className="search-box-wrapper" style={{ margin: 0 }}>
-                            <input 
-                                type="text" 
-                                placeholder={
-                                    activeTab === 'users' 
-                                        ? "Search by username or email..." 
-                                        : activeTab === 'feedback' 
-                                        ? "Search feedback details..." 
-                                        : "Search book title..."
-                                } 
-                                value={search} 
-                                onChange={(e) => setSearch(e.target.value)} 
-                                className="admin-search-input" 
-                            />
-                        </div>
-                    </div>
-                </div>
+                        {activeTab === 'users' && (
+                            <Box sx={{ width: '380px', bgcolor: '#0b0806', border: '1px solid #321e11', borderRadius: '8px', px: '12px', py: '4px', '& input::placeholder': { color: '#9ca3af', opacity: 1 }, '& .MuiInput-input': { color: '#ffffff !important' } }}>
+                                <TextField 
+                                    variant="standard"
+                                    placeholder="Search by username or email..." 
+                                    value={search} 
+                                    onChange={(e) => setSearch(e.target.value)} 
+                                    InputProps={{ disableUnderline: true }}
+                                    inputProps={{ style: { color: "#ffffff", fontSize: "0.9rem" } }}
+                                    fullWidth
+                                />
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
 
-                <div className="admin-table-container">
-                    {loading && <div className="admin-status-msg">Loading...</div>}
-                    {error && <div className="admin-status-msg error-msg">{error}</div>}
+                {/* Table Container */}
+                <Box sx={{ 
+                    background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", 
+                    border: "1px solid rgba(217, 119, 6, 0.2)", 
+                    borderRadius: "12px", 
+                    overflowX: "auto", 
+                    boxShadow: "0 15px 35px rgba(0, 0, 0, 0.7)" 
+                }}>
+                    {loading && <Box sx={{ color: "#9ca3af", fontStyle: "italic", textAlign: "center", py: "50px", fontSize: "1rem" }}>Loading...</Box>}
+                    {error && <Box sx={{ color: "#f87171", fontWeight: 500, textAlign: "center", py: "50px", fontSize: "1rem" }}>{error}</Box>}
 
                     {!loading && !error && activeTab === 'users' && (
                         <UserManage users={users} setUsers={setUsers} search={search} currentUserId={currentUserId} />
@@ -225,9 +381,9 @@ function Dashboard() {
                     {!loading && !error && activeTab === 'books' && (
                         <BookAnalytic books={books} users={users} logs={logs} bookmarks={bookmarks} search={search} sortOption={bookSort} />
                     )}
-                </div>
-            </div>
-        </div>
+                </Box>
+            </Box>
+        </Box>
     )
 }
 

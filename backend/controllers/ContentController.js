@@ -21,16 +21,16 @@ exports.getContentById = async (req, res) => {
 
 exports.addNewContent = async (req, res) => {
     try {
-        let coverImageUrl = req.body.coverImageUrl || "";
+        let coverImageUrl = req.body.coverImageUrl || ""
 
-        let contentImageUrls = [];
+        let contentImageUrls = []
 
         // If URL was entered
         if (req.body.contentImageUrls) {
             contentImageUrls = req.body.contentImageUrls
                 .split(",")
                 .map(url => url.trim())
-                .filter(url => url !== "");
+                .filter(url => url !== "")
         }
 
         // Cover upload
@@ -40,7 +40,7 @@ exports.addNewContent = async (req, res) => {
             req.files.coverImage[0]
         ) {
             coverImageUrl =
-                `/uploads/${req.files.coverImage[0].filename}`;
+                `/uploads/${req.files.coverImage[0].filename}`
         }
 
         // Content image uploads
@@ -51,7 +51,7 @@ exports.addNewContent = async (req, res) => {
         ) {
             contentImageUrls = req.files.contentImages.map(file =>
                 `/uploads/${file.filename}`
-            );
+            )
         }
 
         const newContent = new Content({
@@ -62,24 +62,24 @@ exports.addNewContent = async (req, res) => {
             contentImageUrls,
             totalPages: req.body.totalPages,
             status: req.body.status
-        });
+        })
 
-        await newContent.save();
+        await newContent.save()
 
-        res.status(201).json(newContent);
+        res.status(201).json(newContent)
 
     } catch (error) {
-        console.error(error);
+        console.error(error)
 
         res.status(400).json({
             error: error.message
-        });
+        })
     }
-};
+}
 
 exports.updateContent = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params
 
         const updateData = {
             name: req.body.name,
@@ -87,12 +87,12 @@ exports.updateContent = async (req, res) => {
             category: req.body.category,
             totalPages: req.body.totalPages,
             status: req.body.status
-        };
+        }
 
         // Cover URL
         if (req.body.coverImageUrl) {
             updateData.coverImageUrl =
-                req.body.coverImageUrl;
+                req.body.coverImageUrl
         }
 
         // Content image URLs
@@ -101,7 +101,7 @@ exports.updateContent = async (req, res) => {
                 req.body.contentImageUrls
                     .split(",")
                     .map(url => url.trim())
-                    .filter(url => url !== "");
+                    .filter(url => url !== "")
         }
 
         // New uploaded cover
@@ -111,7 +111,7 @@ exports.updateContent = async (req, res) => {
             req.files.coverImage[0]
         ) {
             updateData.coverImageUrl =
-                `/uploads/${req.files.coverImage[0].filename}`;
+                `/uploads/${req.files.coverImage[0].filename}`
         }
 
         // New uploaded pages
@@ -123,7 +123,7 @@ exports.updateContent = async (req, res) => {
             updateData.contentImageUrls =
                 req.files.contentImages.map(file =>
                     `/uploads/${file.filename}`
-                );
+                )
         }
 
         const updatedContent =
@@ -134,24 +134,24 @@ exports.updateContent = async (req, res) => {
                     new: true,
                     runValidators: true
                 }
-            );
+            )
 
         if (!updatedContent) {
             return res.status(404).json({
                 error: "Content not found"
-            });
+            })
         }
 
-        res.json(updatedContent);
+        res.json(updatedContent)
 
     } catch (error) {
-        console.error(error);
+        console.error(error)
 
         res.status(400).json({
             error: error.message
-        });
+        })
     }
-};
+}
 
 exports.deleteContents = async (req, res) => {
     try {

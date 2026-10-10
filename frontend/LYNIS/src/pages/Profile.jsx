@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router'
-import api from '../utils/api'
-import Navbar from '../components/Navbar'
-import "../styles/Profile.css"
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import { Box, Typography, Button, TextField, Select, MenuItem, Modal, Fade, Backdrop } from '@mui/material';
+import api from '../utils/api';
+import Navbar from '../components/Navbar';
 
 function Profile() {
     const [user, setUser] = useState({ username: "", email: "", avatarUrl: "", role: "user" })
@@ -33,17 +33,17 @@ function Profile() {
                 }
 
                 // Decode user ID directly from the JWT token payload
-                let currentUserId = null;
+                let currentUserId = null
                 try {
-                    const base64Url = token.split('.')[1];
-                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const base64Url = token.split('.')[1]
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
                     const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                    }).join(''));
-                    const decoded = JSON.parse(jsonPayload);
-                    currentUserId = decoded.id || decoded._id || decoded.userId || decoded.sub;
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                    }).join(''))
+                    const decoded = JSON.parse(jsonPayload)
+                    currentUserId = decoded.id || decoded._id || decoded.userId || decoded.sub
                 } catch (e) {
-                    console.error("Token decode error:", e);
+                    console.error("Token decode error:", e)
                 }
 
                 if (!currentUserId) {
@@ -66,33 +66,33 @@ function Profile() {
                 })
                 
                 // Deduplicate bookmarks by book ID, keeping the most recently updated entry
-                const rawBookmarks = bookmarksResponse.data || [];
-                const uniqueMap = new Map();
+                const rawBookmarks = bookmarksResponse.data || []
+                const uniqueMap = new Map()
                 
                 rawBookmarks.forEach(b => {
-                    const bookObj = b.contentId || b.content || b;
-                    const bookId = bookObj._id || bookObj.id || (typeof b.contentId === 'string' ? b.contentId : null);
-                    if (!bookId) return;
+                    const bookObj = b.contentId || b.content || b
+                    const bookId = bookObj._id || bookObj.id || (typeof b.contentId === 'string' ? b.contentId : null)
+                    if (!bookId) return
 
-                    const existing = uniqueMap.get(bookId);
+                    const existing = uniqueMap.get(bookId)
                     if (!existing) {
-                        uniqueMap.set(bookId, b);
+                        uniqueMap.set(bookId, b)
                     } else {
-                        const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
-                        const incomingTime = new Date(b.updatedAt || b.createdAt || 0).getTime();
+                        const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime()
+                        const incomingTime = new Date(b.updatedAt || b.createdAt || 0).getTime()
                         
-                        const mergedIsLiked = existing.isLiked || b.isLiked || existing.liked || b.liked;
-                        const mergedLastPage = Math.max(existing.lastReadPage || existing.lastPage || 1, b.lastReadPage || b.lastPage || 1);
+                        const mergedIsLiked = existing.isLiked || b.isLiked || existing.liked || b.liked
+                        const mergedLastPage = Math.max(existing.lastReadPage || existing.lastPage || 1, b.lastReadPage || b.lastPage || 1)
                         
                         if (incomingTime >= existingTime) {
-                            uniqueMap.set(bookId, { ...b, isLiked: mergedIsLiked, lastReadPage: mergedLastPage });
+                            uniqueMap.set(bookId, { ...b, isLiked: mergedIsLiked, lastReadPage: mergedLastPage })
                         } else {
-                            uniqueMap.set(bookId, { ...existing, isLiked: mergedIsLiked, lastReadPage: mergedLastPage });
+                            uniqueMap.set(bookId, { ...existing, isLiked: mergedIsLiked, lastReadPage: mergedLastPage })
                         }
                     }
-                });
+                })
 
-                setItems(Array.from(uniqueMap.values()));
+                setItems(Array.from(uniqueMap.values()))
 
             } catch (err) {
                 console.error("Fetch error: ", err)
@@ -136,10 +136,10 @@ function Profile() {
 
     // Extract categories dynamically (hiding locked categories for normal users)
     const categories = ["All", ...new Set(items.map(item => {
-        const bookData = item.contentId || item.content || item;
-        const isLocked = bookData.status === "Draft" || bookData.status === "Archived";
-        if (isLocked && !isAdmin) return null;
-        return bookData.category;
+        const bookData = item.contentId || item.content || item
+        const isLocked = bookData.status === "Draft" || bookData.status === "Archived"
+        if (isLocked && !isAdmin) return null
+        return bookData.category
     }).filter(Boolean))]
 
     // Filter and Sort logic: Hides locked books for regular users, shows them for admins
@@ -171,28 +171,22 @@ function Profile() {
     })
 
     const handleOpenContent = (item) => {
-        // Safely extract the book/content object
         const content = item.contentId && typeof item.contentId === 'object' 
             ? item.contentId 
-            : (item.content || item);
+            : (item.content || item)
             
-        // Strict lock check: prevent opening Draft or Archived books
-        const isLocked = content.status === "Draft" || content.status === "Archived";
-        if (isLocked) return;
+        const isLocked = content.status === "Draft" || content.status === "Archived"
+        if (isLocked) return
 
-        // Extract the book ID matching your route parameter (:id)
-        const contentId = content._id || content.id || item.contentId || item._id;
+        const contentId = content._id || content.id || item.contentId || item._id
         
         if (!contentId) {
-            console.error("Could not find valid book ID for item:", item);
-            return;
+            console.error("Could not find valid book ID for item:", item)
+            return
         }
 
-        // Grab the saved last-read page, or default to 1
-        const lastPage = item.lastReadPage || item.lastPage || 1;
-
-        // Navigate using your exact route path (/content/:id)
-        navigate(`/content/${contentId}?page=${lastPage}`);
+        const lastPage = item.lastReadPage || item.lastPage || 1
+        navigate(`/content/${contentId}?page=${lastPage}`)
     }
 
     const avatarSrc = user.avatarUrl 
@@ -200,137 +194,354 @@ function Profile() {
         : ""
 
     return (
-        <div className="profile-page-wrapper">
+        <Box sx={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            minHeight: "100vh", 
+            bgcolor: "#060504", 
+            color: "#f3f4f6", 
+            pb: "60px", 
+            overflowX: "hidden" 
+        }}>
             <Navbar />
 
-            <div className="profile-workspace">
+            <Box sx={{ 
+                width: "100%", 
+                maxWidth: "1100px", 
+                mx: "20px", 
+                mt: "35px", 
+                display: "flex", 
+                flexDirection: "column" 
+            }}>
                 {/* Profile Header Card */}
-                <div className="profile-header-card">
-                    <div className="profile-user-info">
-                        <div className="user-avatar-circle profile-avatar-large">
+                <Box sx={{ 
+                    background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", 
+                    border: "1px solid rgba(217, 119, 6, 0.2)", 
+                    borderRadius: "12px", 
+                    p: "24px", 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center", 
+                    mb: "25px", 
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)", 
+                    flexWrap: "wrap", 
+                    gap: "20px" 
+                }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                        <Box sx={{ 
+                            width: "65px", 
+                            height: "65px", 
+                            bgcolor: "#321e11", 
+                            border: "2px solid #d97706", 
+                            borderRadius: "50%", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center", 
+                            fontSize: "1.5rem", 
+                            color: "#fef3c7", 
+                            fontWeight: 700, 
+                            boxShadow: "0 0 15px rgba(217, 119, 6, 0.3)",
+                            overflow: "hidden"
+                        }}>
                             <img 
                                 src={avatarSrc || "/default-avatar.png"} 
                                 alt={user.username || "User"} 
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                 onError={(e) => { 
-                                    e.target.onerror = null; 
-                                    e.target.src = "/default-avatar.png"; 
+                                    e.target.onerror = null 
+                                    e.target.src = "/default-avatar.png" 
                                 }}
                             />
-                        </div>
-                        <div>
-                            <h2>{user.username || "Loading..."}</h2>
-                            <p>
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ m: "0 0 4px 0", fontSize: "1.5rem", color: "#fef3c7", fontWeight: 700 }}>
+                                {user.username || "Loading..."}
+                            </Typography>
+                            <Typography sx={{ m: 0, fontSize: "0.9rem", color: "#9ca3af", display: "flex", alignItems: "center", gap: "6px" }}>
                                 {user.email || "Loading email..."} • 
-                                <span className={`role-pill ${isAdmin ? 'role-admin' : 'role-user'}`}>
+                                <Box component="span" sx={{ 
+                                    textTransform: "capitalize", 
+                                    color: isAdmin ? "#fbbf24" : "#9ca3af", 
+                                    fontWeight: 600 
+                                }}>
                                     {user.role || "user"}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
+                                </Box>
+                            </Typography>
+                        </Box>
+                    </Box>
 
-                    <div className="profile-actions-group">
-                        <button 
+                    <Box sx={{ display: "flex", gap: "10px" }}>
+                        <Button 
                             onClick={() => {
                                 setEditUsername(user.username || "")
                                 setEditAvatarUrl(user.avatarUrl || "")
                                 setIsEditing(true)
                             }} 
-                            className="profile-edit-btn"
+                            sx={{ 
+                                backgroundColor: "rgba(217, 119, 6, 0.15)", 
+                                border: "1px solid rgba(217, 119, 6, 0.4)", 
+                                color: "#fef3c7", 
+                                padding: "10px 18px", 
+                                borderRadius: "8px", 
+                                textTransform: "none", 
+                                fontSize: "0.9rem", 
+                                fontWeight: 600, 
+                                '&:hover': { backgroundColor: "#d97706", color: "#fff" } 
+                            }}
                         >
                             Edit Profile ✏️
-                        </button>
-                        <button onClick={handleLogout} className="profile-logout-btn">
+                        </Button>
+                        <Button 
+                            onClick={handleLogout} 
+                            sx={{ 
+                                backgroundColor: "rgba(185, 28, 28, 0.15)", 
+                                border: "1px solid rgba(239, 68, 68, 0.4)", 
+                                color: "#fca5a5", 
+                                padding: "10px 18px", 
+                                borderRadius: "8px", 
+                                textTransform: "none", 
+                                fontSize: "0.9rem", 
+                                fontWeight: 600, 
+                                '&:hover': { backgroundColor: "#dc2626", color: "#fff", borderColor: "#ef4444", boxShadow: "0 4px 15px rgba(220, 38, 38, 0.4)" } 
+                            }}
+                        >
                             Logout 🚪
-                        </button>
-                    </div>
-                </div>
+                        </Button>
+                    </Box>
+                </Box>
 
                 {/* Edit Profile Modal Form */}
-                {isEditing && (
-                    <div className="profile-edit-modal">
-                        <form onSubmit={handleSaveProfile} className="edit-form-card">
-                            <h3>Edit Your Profile</h3>
-                            <div className="form-group">
-                                <label>Username:</label>
-                                <input 
-                                    type="text" 
+                <Modal
+                    open={isEditing}
+                    onClose={() => setIsEditing(false)}     
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <Fade in={isEditing}>
+                        <Box component="form" onSubmit={handleSaveProfile} sx={{ 
+                            bgcolor: "#17110d", 
+                            border: "2px solid #d97706", 
+                            p: "30px", 
+                            borderRadius: "12px", 
+                            width: "100%", 
+                            maxWidth: "400px", 
+                            boxShadow: "0 25px 60px rgba(0,0,0,0.95)",
+                            outline: 'none',
+                            display: "flex",
+                            flexDirection: "column"
+                        }}>
+                            <Typography sx={{ 
+                                color: "#fef3c7", 
+                                fontSize: "1.25rem", 
+                                fontWeight: 700, 
+                                mb: "20px" 
+                            }}>
+                                Edit Your Profile
+                            </Typography>
+                            
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px", mb: "20px" }}>
+                                <Typography sx={{ fontSize: "0.85rem", color: "#9ca3af" }}>Username:</Typography>
+                                <TextField 
                                     value={editUsername} 
                                     onChange={(e) => setEditUsername(e.target.value)} 
                                     required
+                                    size="small"
+                                    fullWidth
+                                    sx={{ 
+                                        input: { color: "#fff" },
+                                        "& .MuiOutlinedInput-root": {
+                                            bgcolor: "#0b0806",
+                                            borderRadius: "6px",
+                                            "& fieldset": { borderColor: "#321e11" },
+                                            "&:hover fieldset": { borderColor: "#321e11" },
+                                            "&.Mui-focused fieldset": { borderColor: "#d97706" }
+                                        }
+                                    }}
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label>Profile Picture URL:</label>
-                                <input 
-                                    type="text" 
+                            </Box>
+
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px", mb: "25px" }}>
+                                <Typography sx={{ fontSize: "0.85rem", color: "#9ca3af" }}>Profile Picture URL:</Typography>
+                                <TextField 
                                     placeholder="https://example.com/avatar.jpg or /uploads/..." 
                                     value={editAvatarUrl} 
                                     onChange={(e) => setEditAvatarUrl(e.target.value)} 
+                                    size="small"
+                                    fullWidth
+                                    sx={{ 
+                                        input: { color: "#fff", '&::placeholder': { color: '#6b7280', opacity: 1 } },
+                                        "& .MuiOutlinedInput-root": {
+                                            bgcolor: "#0b0806",
+                                            borderRadius: "6px",
+                                            "& fieldset": { borderColor: "#321e11" },
+                                            "&:hover fieldset": { borderColor: "#321e11" },
+                                            "&.Mui-focused fieldset": { borderColor: "#d97706" }
+                                        }
+                                    }}
                                 />
-                            </div>
-                            <div className="edit-modal-actions">
-                                <button type="submit" className="save-btn">Save Changes</button>
-                                <button type="button" onClick={() => setIsEditing(false)} className="cancel-btn">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                )}
+                            </Box>
+
+                            <Box sx={{ display: "flex", gap: "12px" }}>
+                                <Button type="submit" variant="contained" sx={{ background: "#b45309", color: "#fff", textTransform: "none", fontWeight: 600, flex: 1, '&:hover': { background: "#d97706" } }}>
+                                    Save Changes
+                                </Button>
+                                <Button type="button" onClick={() => setIsEditing(false)} sx={{ color: "#9ca3af", border: "1px solid #321e11", textTransform: "none", flex: 1, '&:hover': { color: "#fff", borderColor: "#6b7280" } }}>
+                                    Cancel
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Fade>
+                </Modal>
 
                 {/* Tab Switcher */}
-                <div className="profile-tab-switcher">
-                    <button 
-                        className={`profile-tab-btn ${activeTab === "watched" ? "active" : ""}`}
+                <Box sx={{ display: "flex", gap: "12px", mb: "20px" }}>
+                    <Button 
                         onClick={() => setActiveTab("watched")}
+                        sx={{ 
+                            backgroundColor: activeTab === "watched" ? "#b45309" : "#120d09", 
+                            border: "1px solid",
+                            borderColor: activeTab === "watched" ? "#d97706" : "#321e11",
+                            color: activeTab === "watched" ? "#fff" : "#9ca3af", 
+                            padding: "10px 20px", 
+                            borderRadius: "8px", 
+                            textTransform: "none", 
+                            fontSize: "0.9rem", 
+                            fontWeight: 600, 
+                            boxShadow: activeTab === "watched" ? "0 4px 12px rgba(180, 83, 9, 0.4)" : "none",
+                            '&:hover': { backgroundColor: activeTab === "watched" ? "#d97706" : "#17110d", color: "#f3f4f6", borderColor: "#d97706" } 
+                        }}
                     >
                         📚 Watched / History Books
-                    </button>
-                    <button 
-                        className={`profile-tab-btn ${activeTab === "liked" ? "active" : ""}`}
+                    </Button>
+                    <Button 
                         onClick={() => setActiveTab("liked")}
+                        sx={{ 
+                            backgroundColor: activeTab === "liked" ? "#b45309" : "#120d09", 
+                            border: "1px solid",
+                            borderColor: activeTab === "liked" ? "#d97706" : "#321e11",
+                            color: activeTab === "liked" ? "#fff" : "#9ca3af", 
+                            padding: "10px 20px", 
+                            borderRadius: "8px", 
+                            textTransform: "none", 
+                            fontSize: "0.9rem", 
+                            fontWeight: 600, 
+                            boxShadow: activeTab === "liked" ? "0 4px 12px rgba(180, 83, 9, 0.4)" : "none",
+                            '&:hover': { backgroundColor: activeTab === "liked" ? "#d97706" : "#17110d", color: "#f3f4f6", borderColor: "#d97706" } 
+                        }}
                     >
                         ❤️ Liked Books
-                    </button>
-                </div>
+                    </Button>
+                </Box>
 
                 {/* Filter & Sort Bar */}
-                <div className="profile-control-panel">
-                    <div className="select-wrapper">
-                        <label>Category:</label>
-                        <select 
+                <Box sx={{ 
+                    background: "linear-gradient(135deg, #17110d 0%, #100b08 100%)", 
+                    border: "1px solid rgba(217, 119, 6, 0.2)", 
+                    borderRadius: "12px", 
+                    p: "16px 20px", 
+                    display: "flex", 
+                    gap: "25px", 
+                    mb: "30px", 
+                    flexWrap: "wrap", 
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)" 
+                }}>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", minWidth: "200px" }}>
+                        <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+                            Category:
+                        </Typography>
+                        <Select 
                             value={selectedCategory} 
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="panel-select"
+                            size="small"
+                            MenuProps={{
+                                PaperProps: {
+                                    sx: {
+                                        bgcolor: "#17110d",
+                                        color: "#f3f4f6",
+                                        border: "1px solid #321e11",
+                                        "& .MuiMenuItem-root": {
+                                            fontSize: "0.9rem",
+                                            color: "#ffffff",
+                                            "&:hover": { bgcolor: "#b45309", color: "#fff" },
+                                            "&.Mui-selected": { bgcolor: "#b45309 !important", color: "#fff" }
+                                        }
+                                    }
+                                }
+                            }}
+                            sx={{
+                                backgroundColor: '#0b0806',
+                                color: '#f3f4f6',
+                                border: '1px solid #321e11',
+                                borderRadius: '8px',
+                                fontSize: '0.9rem',
+                                ".MuiSelect-select": { color: "#f3f4f6", py: "10px" },
+                                ".MuiOutlinedInput-notchedOutline": { border: "none" },
+                                ".MuiSvgIcon-root": { color: "#9ca3af" },
+                                '&.Mui-focused': { boxShadow: '0 0 8px rgba(217, 119, 6, 0.25)' }
+                            }}
                         >
                             {categories.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
+                                <MenuItem key={cat} value={cat}>{cat}</MenuItem>
                             ))}
-                        </select>
-                    </div>
+                        </Select>
+                    </Box>
 
-                    <div className="select-wrapper">
-                        <label>Sort By:</label>
-                        <select 
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", minWidth: "200px" }}>
+                        <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+                            Sort By:
+                        </Typography>
+                        <Select 
                             value={sortBy} 
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="panel-select"
+                            size="small"
+                            MenuProps={{
+                                PaperProps: {
+                                    sx: {
+                                        bgcolor: "#17110d",
+                                        color: "#f3f4f6",
+                                        border: "1px solid #321e11",
+                                        "& .MuiMenuItem-root": {
+                                            fontSize: "0.9rem",
+                                            color: "#ffffff",
+                                            "&:hover": { bgcolor: "#b45309", color: "#fff" },
+                                            "&.Mui-selected": { bgcolor: "#b45309 !important", color: "#fff" }
+                                        }
+                                    }
+                                }
+                            }}
+                            sx={{
+                                backgroundColor: '#0b0806',
+                                color: '#f3f4f6',
+                                border: '1px solid #321e11',
+                                borderRadius: '8px',
+                                fontSize: '0.9rem',
+                                ".MuiSelect-select": { color: "#f3f4f6", py: "10px" },
+                                ".MuiOutlinedInput-notchedOutline": { border: "none" },
+                                ".MuiSvgIcon-root": { color: "#9ca3af" },
+                                '&.Mui-focused': { boxShadow: '0 0 8px rgba(217, 119, 6, 0.25)' }
+                            }}
                         >
-                            <option value="recent">Recently Read</option>
-                            <option value="name">Title (A-Z)</option>
-                        </select>
-                    </div>
-                </div>
+                            <MenuItem value="recent">Recently Read</MenuItem>
+                            <MenuItem value="name">Title (A-Z)</MenuItem>
+                        </Select>
+                    </Box>
+                </Box>
 
                 {/* Content / Book Grid Area */}
-                <div className="profile-books-grid-container">
-                    {loading && <div className="admin-status-msg">Loading reading vault...</div>}
-                    {error && <div className="admin-status-msg error-msg">{error}</div>}
+                <Box sx={{ width: "100%" }}>
+                    {loading && <Box sx={{ color: "#9ca3af", fontStyle: "italic", textAlign: "center", py: "60px", fontSize: "1rem" }}>Loading reading vault...</Box>}
+                    {error && <Box sx={{ color: "#f87171", fontStyle: "italic", textAlign: "center", py: "60px", fontSize: "1rem" }}>{error}</Box>}
 
                     {!loading && !error && filteredItems.length === 0 ? (
-                        <div className="admin-status-msg">
+                        <Box sx={{ color: "#9ca3af", fontStyle: "italic", textAlign: "center", py: "60px", fontSize: "1rem" }}>
                             {activeTab === "watched" ? "No reading history found yet." : "No liked books found."}
-                        </div>
+                        </Box>
                     ) : (
-                        <div className="profile-books-grid">
+                        <Box sx={{ 
+                            display: "grid", 
+                            gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", 
+                            gap: "30px" 
+                        }}>
                             {filteredItems.map((item) => {
                                 const book = item.contentId && typeof item.contentId === 'object' 
                                     ? item.contentId 
@@ -345,53 +556,81 @@ function Profile() {
                                     : `http://localhost:2406${rawCover}`
 
                                 return (
-                                    <div 
+                                    <Box 
                                         key={book._id || item._id} 
-                                        className="profile-book-card"
                                         onClick={() => {
-                                            // Completely block clicking on locked books for everyone (including admins)
-                                            if (isLocked) return;
-                                            handleOpenContent(item);
+                                            if (isLocked) return
+                                            handleOpenContent(item)
                                         }}
-                                        style={isLocked && !isAdmin ? { display: 'none' } : {}}
+                                        sx={{ 
+                                            position: "relative", 
+                                            cursor: isLocked && !isAdmin ? 'default' : 'pointer', 
+                                            transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                                            '&:hover': { transform: isLocked && !isAdmin ? 'none' : 'translateY(-10px) scale(1.03)', '& .profile-book-overlay': { opacity: isLocked && !isAdmin ? 0 : 1 } },
+                                            display: isLocked && !isAdmin ? 'none' : 'block'
+                                        }}
                                     >
-                                        <div 
-                                            className="profile-cover-frame"
-                                            style={isLocked && isAdmin ? { filter: 'grayscale(50%) brightness(0.65)', opacity: 0.75, cursor: 'not-allowed' } : {}}
-                                        >
-                                            <img 
+                                        <Box sx={{ 
+                                            position: "relative", 
+                                            borderRadius: "6px", 
+                                            overflow: "hidden",
+                                            ...(isLocked && isAdmin ? { filter: 'grayscale(50%) brightness(0.65)', opacity: 0.75, cursor: 'not-allowed' } : {})
+                                        }}>
+                                            <Box 
+                                                component="img"
                                                 src={coverUrl} 
                                                 alt={book.name || book.title || "Book"} 
-                                                className="profile-book-img"
                                                 onError={(e) => { 
-                                                    e.target.onerror = null;
-                                                    e.target.style.display = 'none'; 
+                                                    e.target.onerror = null
+                                                    e.target.style.display = 'none' 
+                                                }}
+                                                sx={{ 
+                                                    width: "100%", 
+                                                    height: "230px", 
+                                                    objectFit: "cover", 
+                                                    borderRadius: "6px", 
+                                                    border: "1px solid rgba(255, 255, 255, 0.18)", 
+                                                    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.9)", 
+                                                    display: "block" 
                                                 }}
                                             />
-                                            <div className="profile-book-overlay">
-                                                <span className="profile-book-title">{book.name || book.title} {isAdmin && statusLabel}</span>
+                                            <Box className="profile-book-overlay" sx={{ 
+                                                position: "absolute", 
+                                                inset: 0, 
+                                                background: "rgba(12, 7, 4, 0.92)", 
+                                                backdropFilter: "blur(6px)", 
+                                                display: "flex", 
+                                                flexDirection: "column", 
+                                                justifyContent: "center", 
+                                                alignItems: "center", 
+                                                padding: "14px", 
+                                                textAlign: "center", 
+                                                opacity: 0, 
+                                                borderRadius: "6px", 
+                                                transition: "opacity 0.25s ease" 
+                                            }}>
+                                                <Typography sx={{ color: "#fff", fontSize: "0.9rem", fontWeight: 600, mb: "12px", lineHeight: 1.3 }}>
+                                                    {book.name || book.title} {isAdmin && statusLabel}
+                                                </Typography>
                                                 {isLocked && isAdmin ? (
-                                                    <span 
-                                                        className="profile-resume-tag" 
-                                                        style={{ background: "#555", color: "#ccc", cursor: "not-allowed", pointerEvents: "none" }}
-                                                    >
+                                                    <Box component="span" sx={{ fontSize: "0.75rem", background: "#555", color: "#ccc", cursor: "not-allowed", pointerEvents: "none", p: "6px 12px", borderRadius: "12px", fontWeight: 600 }}>
                                                         Locked ({book.status}) 🔒
-                                                    </span>
+                                                    </Box>
                                                 ) : (
-                                                    <span className="profile-resume-tag">
+                                                    <Box component="span" sx={{ fontSize: "0.75rem", color: "#fff", background: "#b45309", p: "6px 12px", borderRadius: "12px", fontWeight: 600, boxShadow: "0 4px 10px rgba(180, 83, 9, 0.4)" }}>
                                                         Resume Page {item.lastReadPage || item.lastPage || 1} 📖
-                                                    </span>
+                                                    </Box>
                                                 )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                            </Box>
+                                        </Box>
+                                    </Box>
                                 )
                             })}
-                        </div>
+                        </Box>
                     )}
-                </div>
-            </div>
-        </div>
+                </Box>
+            </Box>
+        </Box>
     )
 }
 

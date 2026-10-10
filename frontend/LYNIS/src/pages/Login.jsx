@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import api from '../utils/api'
-import { useNavigate } from 'react-router'
+import { useState, useEffect } from 'react';
+import api from '../utils/api';
+import { useNavigate } from 'react-router';
 
 function Login () {
     const [username, setUsername] = useState("")
@@ -9,29 +9,29 @@ function Login () {
     const navigate = useNavigate()
 
     useEffect(() => {
-        const userToken = localStorage.getItem("token");
-        console.log(userToken);
-        if (userToken !== null) navigate("/home");
+        const userToken = localStorage.getItem("token")
+        console.log(userToken)
+        if (userToken !== null) navigate("/home")
     }, [])
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log("Form submitted:", { username, password });
+        e.preventDefault()
+        console.log("Form submitted:", { username, password })
         try {
             const response = await api.post("/users/login", {
                 username,
                 password,
-            });
-            localStorage.setItem("token", response.data.token);
+            })
+            localStorage.setItem("token", response.data.token)
             localStorage.setItem("role", response.data.role)
-            navigate("/home");
-            console.log(response.data);
-            alert("Login Successful!");
+            navigate("/home")
+            console.log(response.data)
+            alert("Login Successful!")
         } catch (error) {
-            console.log("Login Error: ", error);
+            console.log("Login Error: ", error)
             alert("Login failed. Wrong username or password")
         }
-    };
+    }
 
     return(
         <div className="login-wrapper">

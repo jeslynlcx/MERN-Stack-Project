@@ -6,7 +6,7 @@ body {
     color: #f3f4f6;
 }
 
-/* --- Authentication Styles (Login & Register - Untouched) --- */
+/* --- Login & Register --- */
 .login-wrapper {
     display: flex;
     flex-direction: column;
@@ -101,7 +101,7 @@ body {
 }
 
 
-/* --- Beautiful Home Page Layout Styles --- */
+/* --- Home Page --- */
 .home-wrapper {
     display: flex;
     flex-direction: column;
@@ -111,7 +111,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Hero Section with Soft Radial Glow */
 .hero-section {
     position: relative;
     padding: 60px 20px 70px 20px;
@@ -120,7 +119,7 @@ body {
 
 .hero-glow-accent {
     position: absolute;
-    top: 11%;
+    top: 10%;
     left: 47%;
     transform: translateX(-50%);
     width: 550px;
@@ -195,18 +194,16 @@ body {
     color: #ffffff !important;
 }
 
-/* Features Row Layout */
+/* Features Row  */
 .features-container {
     max-width: 1200px;
     margin: 40px auto 60px auto;
     padding: 0 20px;
 }
 
-/* Target the Bootstrap Row inside features-container to display in one row */
 .features-container .row {
     display: flex;
     flex-direction: row !important;
-    flex-wrap: nowrap; /* Keeps them in one single row across larger screens */
     gap: 20px;
 }
 
@@ -232,7 +229,7 @@ body {
     padding: 24px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    flex: 1; /* Distributes equal width across the row items */
+    flex: 1;
 }
 
 .feature-box:hover {
@@ -367,7 +364,6 @@ body {
         font-size: 2.5rem;
     }
 
-    /* Allow wrapping on smaller mobile viewports so they don't squish */
     .features-container .row {
         flex-wrap: wrap;
     }

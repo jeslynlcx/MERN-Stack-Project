@@ -2,44 +2,50 @@ const Bookmark = require('../models/Bookmark')
 
 exports.getAllBookmarks = async (req, res) => {
     try {
-        const { contentId } = req.query;
-        let query = {};
+        const { contentId } = req.query
+        let query = {}
         if (contentId) { //if contentId is passed, filter by it.
-            query.contentId = contentId;
+            query.contentId = contentId
         } else if (req.user?.role !== 'admin') { //if the user is an admin, fetch all bookmarks.
-            query.userId = req.user?.id || req.user?._id;
+            query.userId = req.user?.id || req.user?._id
         }
 
-        const bookmarks = await Bookmark.find(query).populate('contentId').populate('userId', 'username role');
-        res.json(bookmarks);
+        const bookmarks = await Bookmark.find(query).populate('contentId').populate('userId', 'username role')
+        res.json(bookmarks)
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message })
     }
 }
 
 exports.getUserBookmarks = async (req, res) => {
     try {
-        const bookmarks = await Bookmark.find({ userId: req.params.id }).populate('contentId');
-        res.json(bookmarks);
+        const bookmarks = await Bookmark.find({ userId: req.params.id }).populate('contentId')
+        res.json(bookmarks)
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message })
     }
-};
+}
 
 exports.updateReadingProgress = async (req, res) => {
     try {
-        const { userId, contentId, lastReadPage, isLiked, rating, comment } = req.body;
+        const { userId, contentId, lastReadPage, isLiked, rating } = req.body
         
+        const updateFields = { lastAccessed: Date.now() }
+        if (lastReadPage !== undefined) updateFields.lastReadPage = lastReadPage
+        if (isLiked !== undefined) updateFields.isLiked = isLiked
+        if (rating !== undefined) updateFields.rating = rating
+
         const bookmark = await Bookmark.findOneAndUpdate(
             { userId, contentId },
-            { lastReadPage, isLiked, rating, comment, lastAccessed: Date.now() },
-            { new: true, upsert: true }
-        );
-        res.json(bookmark);
+            { $set: updateFields },
+            { new: true, upsert: true, setDefaultsOnInsert: true }
+        )
+        res.json(bookmark)
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.message })
     }
 }
+
 
 exports.deleteBookmark = async (req, res) => {
     try {

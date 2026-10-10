@@ -3,7 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router';
 import HTMLFlipBook from 'react-pageflip';
 import api from '../utils/api';
 import BookPage from '../components/BookPage';
-import "../styles/BookReader.css"
+import "../styles/BookReader.css";
 
 const fetchUserId = () => {
     try {
@@ -153,7 +153,7 @@ function BookReader() {
                 return (
                   <div key={`end-${index}`} className="end-page-marker">
                     <p className="end-page-text" onClick={() => navigate(-1)}>
-                      End &rarr;
+                      End &rarr
                     </p>
                   </div>
                 )

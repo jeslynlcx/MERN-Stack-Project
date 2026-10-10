@@ -1,16 +1,15 @@
 import { useNavigate } from "react-router";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import "../styles/Home.css";
-import Navbar from "../components/Navbar"; 
+import Navbar from "../components/Navbar" ;
 
 function HomePage() {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     return (
         <div className="home-wrapper">
             <Navbar />
             
-            {/* Hero Section with Ambient Glow */}
             <header className="hero-section text-center">
                 <div className="hero-glow-accent"></div>
                 <Container className="hero-container-inner position-relative">
@@ -81,7 +80,7 @@ function HomePage() {
                 </Row>
             </Container>
 
-            {/* Teaser / Stats Showcase Banner */}
+            {/* Teaser Banner */}
             <div className="teaser-banner-wrapper">
                 <Container className="teaser-inner text-center py-5">
                     <h3>Curated for Quality & Nostalgia</h3>
@@ -142,7 +141,7 @@ function HomePage() {
                 </div>
             </footer>
         </div>
-    );
+    )
 }
 
-export default HomePage;
+export default HomePage

@@ -8,8 +8,8 @@ router.use(express.json())
 router.post("/register", UserController.register)
 router.post("/login", UserController.login)
 router.get("/", auth.authenticate, UserController.getAllUsers)
-router.get("/:id", auth.authenticate, UserController.getUsersById);
-router.put("/:id", auth.authenticate, UserController.updateUser);
+router.get("/:id", auth.authenticate, UserController.getUsersById)
+router.put("/:id", auth.authenticate, UserController.updateUser)
 router.delete("/:id", auth.authenticate, UserController.deleteUser)
 
 module.exports = router
