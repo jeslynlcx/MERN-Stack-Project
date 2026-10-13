@@ -34,7 +34,6 @@ exports.updateReadingProgress = async (req, res) => {
         if (lastReadPage !== undefined) updateFields.lastReadPage = lastReadPage
         if (isLiked !== undefined) updateFields.isLiked = isLiked
         if (rating !== undefined) updateFields.rating = rating
-
         const bookmark = await Bookmark.findOneAndUpdate(
             { userId, contentId },
             { $set: updateFields },

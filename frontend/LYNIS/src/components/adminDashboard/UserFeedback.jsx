@@ -19,25 +19,24 @@ function UserFeedback({ logs, setLogs, search, sortOption, actionFilter }) {
         }
     }
 
-    const feedbackLogs = logs.filter(log => {
+    const feedbackLogs = logs.filter(log => {  //filter function 
         const matchesAction = actionFilter === 'all' || log.action === actionFilter
         const isAllowedType = log.action === 'FEEDBACK_REVIEWED' || log.action === 'REPORT' || log.action === 'OTHER'
         return matchesAction && isAllowedType
     })
 
-    const searchedFeedback = feedbackLogs.filter(log => 
+    const searchedFeedback = feedbackLogs.filter(log =>  //search function
         (log.details && log.details.toLowerCase().includes(search.toLowerCase())) ||
         (log.userId?.username && log.userId.username.toLowerCase().includes(search.toLowerCase()))
     )
 
-    const sortedFeedback = [...searchedFeedback].sort((a, b) => {
-        if (sortOption === 'oldest') {
-            return new Date(a.createdAt) - new Date(b.createdAt)
-        } else if (sortOption === 'user') {
+    const sortedFeedback = [...searchedFeedback].sort((a, b) => {  //sort function
+        if (sortOption === 'user') {
             const nameA = a.userId?.username || ""
             const nameB = b.userId?.username || ""
             return nameA.localeCompare(nameB)
         } else {
+            // Default to newest / latest first
             return new Date(b.createdAt) - new Date(a.createdAt)
         }
     })

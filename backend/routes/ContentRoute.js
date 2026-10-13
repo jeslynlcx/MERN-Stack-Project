@@ -4,7 +4,7 @@ const ContentController = require('../controllers/ContentController')
 const auth = require('../middlewares/auth')
 const multer = require('multer')
 
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({ dest: 'uploads/' })  //use for upload file 
 router.use(express.json())
 
 router.get("/", auth.authenticate,ContentController.getAllContents)

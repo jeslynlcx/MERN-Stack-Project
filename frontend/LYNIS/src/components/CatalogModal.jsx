@@ -3,10 +3,10 @@ import { Box, Typography, Button, TextField, Select, MenuItem, Modal, Fade } fro
 
 export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) => {
     const [cover, setCover] = useState("file")
-    const [content, setContent] = useState("file")
     const [coverImageFile, setCoverImageFile] = useState(null)
-    const [imageUrl, setImageUrl] = useState([""])
-    const [imageFile, setImageFile] = useState([])
+    const [contentPages, setContentPages] = useState([{ type: 'url', value: '', file: null }])
+    const [draggedItemIndex, setDraggedItemIndex] = useState(null)
+    const [dragOverIndex, setDragOverIndex] = useState(null)
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -20,11 +20,21 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
         if (!isOpen) return
 
         if (editingItem) {
-            let urls = [""]
-            if (Array.isArray(editingItem.imageUrl) && editingItem.imageUrl.length > 0) {
+            let initialPages = [{ type: 'url', value: '', file: null }]
+            let urls = []
+            
+            if (Array.isArray(editingItem.contentImageUrls) && editingItem.contentImageUrls.length > 0) {
+                urls = editingItem.contentImageUrls
+            } else if (typeof editingItem.contentImageUrls === "string" && editingItem.contentImageUrls.trim() !== "") {
+                urls = editingItem.contentImageUrls.split(",").map(urlItem => urlItem.trim())
+            } else if (Array.isArray(editingItem.imageUrl) && editingItem.imageUrl.length > 0) {
                 urls = editingItem.imageUrl
             } else if (typeof editingItem.imageUrl === "string" && editingItem.imageUrl.trim() !== "") {
                 urls = editingItem.imageUrl.split(",").map(urlItem => urlItem.trim())
+            }
+
+            if (urls.length > 0) {
+                initialPages = urls.map(u => ({ type: 'url', value: u, file: null }))
             }
 
             setFormData({
@@ -32,12 +42,11 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                 description: editingItem.description || "",
                 category: editingItem.category || "",
                 coverImageUrl: editingItem.coverImageUrl || "",
-                totalPages: editingItem.totalPages || 1,
+                totalPages: urls.length > 0 ? urls.length : (editingItem.totalPages || 1),
                 status: editingItem.status || "Published"
             })
-            setImageUrl(urls)
+            setContentPages(initialPages)
             setCover("url")
-            setContent("url")
         } else {
             setFormData({
                 name: "",
@@ -47,12 +56,10 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                 totalPages: 1,
                 status: "Published"
             })
-            setImageUrl([""])
+            setContentPages([{ type: 'url', value: '', file: null }])
             setCover("file")
-            setContent("file")
         }
         setCoverImageFile(null)
-        setImageFile([])
     }, [isOpen, editingItem])
 
     if (!isOpen) return null
@@ -61,54 +68,115 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    const handleUrlChange = (index, value) => {
-        const updatedUrls = [...imageUrl]
-        updatedUrls[index] = value
-        setImageUrl(updatedUrls)
+    const handlePageTypeChange = (index, newType) => {
+        const updated = [...contentPages]
+        updated[index] = { type: newType, value: updated[index].value, file: null }
+        setContentPages(updated)
     }
 
-    const addUrlField = () => setImageUrl([...imageUrl, ""])
+    const handlePageValueChange = (index, val) => {
+        const updated = [...contentPages]
+        updated[index].value = val
+        setContentPages(updated)
+    }
 
-    const removeUrlField = (index) => {
-        const updatedUrls = imageUrl.filter((_, itemIndex) => itemIndex !== index)
-        setImageUrl(updatedUrls.length ? updatedUrls : [""])
+    const handlePageFileChange = (index, file) => {
+        const updated = [...contentPages]
+        updated[index].file = file
+        if (file) {
+            updated[index].value = file.name
+        }
+        setContentPages(updated)
+    }
+
+    // Optimized Drag & Drop Handlers
+    const handleDragStart = (e, index) => {
+        setDraggedItemIndex(index)
+        e.dataTransfer.effectAllowed = "move"
+        e.dataTransfer.setData("text/plain", index)
+    }
+
+    const handleDragOver = (e, index) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = "move"
+        if (dragOverIndex !== index) {
+            setDragOverIndex(index)
+        }
+    }
+
+    const handleDragLeave = () => {
+        setDragOverIndex(null)
+    }
+
+    const handleDrop = (e, targetIndex) => {
+        e.preventDefault()
+        if (draggedItemIndex === null || draggedItemIndex === targetIndex) {
+            setDraggedItemIndex(null)
+            setDragOverIndex(null)
+            return
+        }
+
+        const updated = [...contentPages]
+        const [movedItem] = updated.splice(draggedItemIndex, 1)
+        updated.splice(targetIndex, 0, movedItem)
+
+        setDraggedItemIndex(null)
+        setDragOverIndex(null)
+        setContentPages(updated)
+    }
+
+    const addPageField = () => {
+        const updated = [...contentPages, { type: 'url', value: '', file: null }]
+        setContentPages(updated)
+        setFormData(prev => ({ ...prev, totalPages: updated.length }))
+    }
+
+    const removePageField = (index) => {
+        const updated = contentPages.filter((_, i) => i !== index)
+        const finalPages = updated.length ? updated : [{ type: 'url', value: '', file: null }]
+        setContentPages(finalPages)
+        setFormData(prev => ({ ...prev, totalPages: finalPages.length }))
     }
 
     const handleFilesBulkSelect = (e) => {
         const selectedFiles = Array.from(e.target.files)
         if (selectedFiles.length > 0) {
-            selectedFiles.sort((firstFile, secondFile) => firstFile.name.localeCompare(secondFile.name, undefined, { numeric: true, sensitivity: 'base' }))
-            setImageFile(previousFiles => [...previousFiles, ...selectedFiles])
+            selectedFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+            const newFilePages = selectedFiles.map(file => ({ type: 'file', value: file.name, file }))
+            const updated = [...contentPages, ...newFilePages]
+            setContentPages(updated)
+            setFormData(prev => ({ ...prev, totalPages: updated.length }))
         }
-    }
-
-    const addFileField = () => setImageFile([...imageFile, null])
-
-    const removeFileField = (index) => {
-        const updatedFiles = imageFile.filter((_, itemIndex) => itemIndex !== index)
-        setImageFile(updatedFiles)
-    }
-
-    const handleSingleFileChange = (index, file) => {
-        const updatedFiles = [...imageFile]
-        updatedFiles[index] = file
-        setImageFile(updatedFiles)
     }
 
     const handleSubmit = (e) => {
         e.preventDefault()
         const data = new FormData()
 
-        Object.entries(formData).forEach(([key, val]) => data.append(key, val))
-        if (cover === "file" && coverImageFile) {
-            data.append("coverImage", coverImageFile)
+        const currentTotalPages = contentPages.length
+        const finalData = { ...formData, totalPages: currentTotalPages }
+
+        Object.entries(finalData).forEach(([key, val]) => data.append(key, val))
+        
+        if (cover === "file" && coverImageFile) {  
+            data.append("coverImage", coverImageFile) 
         }
-        if (content === "file") {
-            const validFiles = imageFile.filter(file => file !== null && file !== undefined)
-            validFiles.forEach(file => data.append("contentImages", file))
-        } else {
-            const validUrls = imageUrl.filter(urlItem => urlItem.trim() !== "")
-            data.append("imageUrl", validUrls.join(", "))
+
+        const allPageUrls = []
+
+        contentPages.forEach(page => {
+            if (page.type === 'file' && page.file) {
+                data.append("contentImages", page.file)
+                allPageUrls.push(`/uploads/${page.file.name}`)
+            } else if (page.value && page.value.trim() !== "") {
+                allPageUrls.push(page.value.trim())
+            } else {
+                allPageUrls.push("")
+            }
+        })
+
+        if (allPageUrls.length > 0) {
+            data.append("contentImageUrls", allPageUrls.join(", "))
         }
 
         onSave(data, editingItem ? editingItem._id : null)
@@ -157,7 +225,6 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                         gap: "20px",
                         scrollbarWidth: 'thin',
                         scrollbarColor: '#1e1b1a #0b0806',
-
                     }}
                 >
                     <Typography sx={{ color: "#fef3c7", fontSize: "1.25rem", fontWeight: 700, mb: "-10px" }}>
@@ -246,101 +313,124 @@ export const CatalogModal = ({ isOpen, onClose, onSave, editingItem = null }) =>
                         )}
                     </Box>
 
-                    {/* Content Pages / Images */}
+                    {/* Content Pages */}
                     <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <Typography sx={{ fontSize: "0.85rem", color: "#9ca3af" }}>Content Pages / Images:</Typography>
-                            <Typography 
-                                component="span"
-                                onClick={() => setContent(content === "url" ? "file" : "url")}
-                                sx={{ fontSize: "0.75rem", color: "#fbbf24", cursor: "pointer", textDecoration: "underline", '&:hover': { color: "#fef3c7" } }}
+                            <Button 
+                                component="label"
+                                sx={{ background: "transparent", color: "#fbbf24", fontSize: "0.75rem", textTransform: "none", p: 0, '&:hover': { background: "transparent", textDecoration: "underline" } }}
                             >
-                                Switch to {content === "url" ? "Multiple File Upload" : "Multiple URLs"}
-                            </Typography>
+                                📁 Bulk Upload Files
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    multiple 
+                                    onChange={handleFilesBulkSelect} 
+                                    style={{ display: 'none' }}
+                                />
+                            </Button>
                         </Box>
 
-                        {content === "url" ? (
-                            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                {imageUrl.map((url, index) => (
-                                    <Box key={index} sx={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                                        <TextField 
-                                            type="text" 
-                                            value={url} 
-                                            onChange={(e) => handleUrlChange(index, e.target.value)} 
-                                            placeholder={`Page ${index + 1} Image URL`} 
-                                            size="small"
-                                            fullWidth
-                                            sx={inputStyles}
-                                        />
-                                        {imageUrl.length > 1 && (
+                        <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            {contentPages.map((page, index) => {
+                                const isDragging = draggedItemIndex === index;
+                                const isDragOver = dragOverIndex === index;
+
+                                return (
+                                    <Box 
+                                        key={index} 
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        sx={{ 
+                                            display: "flex", 
+                                            gap: "8px", 
+                                            alignItems: "center", 
+                                            bgcolor: isDragging ? "#1c140f" : "#0b0806", 
+                                            p: "6px", 
+                                            borderRadius: "6px", 
+                                            border: isDragOver ? "2px dashed #fbbf24" : "1px solid #321e11",
+                                            opacity: isDragging ? 0.3 : 1,
+                                            cursor: "grab",
+                                            '&:active': { cursor: "grabbing" }
+                                        }}
+                                    >
+                                        <Box 
+                                            sx={{ 
+                                                display: "flex", 
+                                                alignItems: "center", 
+                                                justifyContent: "center", 
+                                                px: "4px", 
+                                                color: "#fbbf24",
+                                                fontSize: "1rem",
+                                                userSelect: "none" 
+                                            }} 
+                                            title="Drag box to reorder"
+                                        >
+                                            ☰
+                                        </Box>
+
+                                        <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", minWidth: "35px" }}>
+                                            P.{index + 1}
+                                        </Typography>
+
+                                        {page.type === 'url' ? (
+                                            <TextField 
+                                                type="text" 
+                                                value={page.value} 
+                                                onChange={(e) => handlePageValueChange(index, e.target.value)} 
+                                                placeholder="Image URL..." 
+                                                size="small"
+                                                fullWidth
+                                                sx={inputStyles}
+                                            />
+                                        ) : (
+                                            <Box sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.85rem", color: "#d1d5db", px: "4px" }}>
+                                                {page.file ? page.file.name : (
+                                                    <input 
+                                                        type="file" 
+                                                        accept="image/*" 
+                                                        onChange={(e) => handlePageFileChange(index, e.target.files[0])} 
+                                                        style={{ color: "#f3f4f6", fontSize: "0.8rem" }}
+                                                    />
+                                                )}
+                                            </Box>
+                                        )}
+
+                                        <Button 
+                                            type="button" 
+                                            onClick={() => handlePageTypeChange(index, page.type === 'url' ? 'file' : 'url')}
+                                            sx={{ minWidth: "auto", fontSize: "0.7rem", color: "#fbbf24", textTransform: "none", px: "6px" }}
+                                            title="Switch type"
+                                        >
+                                            {page.type === 'url' ? '📁 File' : '🔗 URL'}
+                                        </Button>
+
+                                        {contentPages.length > 1 && (
                                             <Button 
                                                 type="button" 
-                                                onClick={() => removeUrlField(index)}
-                                                sx={{ minWidth: "36px", height: "36px", bgcolor: "#1c140f", color: "#f87171", border: "1px solid #321e11", '&:hover': { bgcolor: "#321e11" } }}
-                                                title="Remove URL"
+                                                onClick={() => removePageField(index)}
+                                                sx={{ minWidth: "28px", height: "28px", bgcolor: "#1c140f", color: "#f87171", border: "1px solid #321e11", '&:hover': { bgcolor: "#321e11" } }}
+                                                title="Remove Page"
                                             >
                                                 ✕
                                             </Button>
                                         )}
                                     </Box>
-                                ))}
-                                <Button 
-                                    type="button" 
-                                    onClick={addUrlField}
-                                    sx={{ background: "transparent", color: "#fbbf24", border: "1px dashed #d97706", padding: "8px", borderRadius: "6px", textTransform: "none", fontSize: "0.85rem", '&:hover': { background: "rgba(217, 119, 6, 0.1)" } }}
-                                >
-                                    + Add Another URL
-                                </Button>
-                            </Box>
-                        ) : (
-                            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                {imageFile.map((file, index) => (
-                                    <Box key={index} sx={{ display: "flex", gap: "8px", alignItems: "center", bgcolor: "#0b0806", p: "8px", borderRadius: "6px", border: "1px solid #321e11" }}>
-                                        <Box sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.85rem", color: "#d1d5db" }}>
-                                            {file ? file.name : (
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    onChange={(e) => handleSingleFileChange(index, e.target.files[0])} 
-                                                    style={{ color: "#f3f4f6", fontSize: "0.85rem" }}
-                                                />
-                                            )}
-                                        </Box>
-                                        <Button 
-                                            type="button" 
-                                            onClick={() => removeFileField(index)}
-                                            sx={{ minWidth: "32px", height: "32px", bgcolor: "#1c140f", color: "#f87171", border: "1px solid #321e11", '&:hover': { bgcolor: "#321e11" } }}
-                                            title="Remove File"
-                                        >
-                                            ✕
-                                        </Button>
-                                    </Box>
-                                ))}
+                                );
+                            })}
 
-                                <Box sx={{ display: "flex", gap: "8px", mt: "4px" }}>
-                                    <Button 
-                                        component="label"
-                                        sx={{ flex: 1, background: "transparent", color: "#fbbf24", border: "1px dashed #d97706", padding: "10px", borderRadius: "6px", textTransform: "none", fontSize: "0.85rem", '&:hover': { background: "rgba(217, 119, 6, 0.1)" } }}
-                                    >
-                                        📁 Select Multiple Files at Once
-                                        <input 
-                                            type="file" 
-                                            accept="image/*" 
-                                            multiple 
-                                            onChange={handleFilesBulkSelect} 
-                                            style={{ display: 'none' }}
-                                        />
-                                    </Button>
-                                    <Button 
-                                        type="button" 
-                                        onClick={addFileField}
-                                        sx={{ background: "transparent", color: "#fbbf24", border: "1px dashed #d97706", padding: "10px 14px", borderRadius: "6px", textTransform: "none", fontSize: "0.85rem", '&:hover': { background: "rgba(217, 119, 6, 0.1)" } }}
-                                    >
-                                        + Add Blank Row
-                                    </Button>
-                                </Box>
-                            </Box>
-                        )}
+                            <Button 
+                                type="button" 
+                                onClick={addPageField}
+                                sx={{ background: "transparent", color: "#fbbf24", border: "1px dashed #d97706", padding: "8px", borderRadius: "6px", textTransform: "none", fontSize: "0.85rem", '&:hover': { background: "rgba(217, 119, 6, 0.1)" } }}
+                            >
+                                + Add Another Page
+                            </Button>
+                        </Box>
                     </Box>
 
                     {/* Total Pages */}

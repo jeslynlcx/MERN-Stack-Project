@@ -83,7 +83,7 @@ function Catalog() {
         }
     }
 
-    const categories = ["All", ...new Set(contents.map(item => item.category).filter(Boolean))]
+    const categories = ["All", ...new Set(contents.filter(item => isAdmin || (item.status || "Published") === "Published").map(item => item.category).filter(Boolean))]
 
     const filteredContents = contents.filter(item => {
         const status = item.status || "Published"

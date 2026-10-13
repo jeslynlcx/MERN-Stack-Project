@@ -6,8 +6,7 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
     const [selectedBookComments, setSelectedBookComments] = useState(null)
     const [comments, setComments] = useState([])
 
-    // Fetch comments from the backend when the component loads
-    useEffect(() => {
+    useEffect(() => {        // Fetch comments from the backend
         api.get('/comment')
             .then(response => {
                 setComments(response.data)
@@ -18,19 +17,19 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
     }, [])
 
     const filteredBooks = books.filter(book =>
-        book.name && book.name.toLowerCase().includes(search.toLowerCase())
+        book.name && book.name.toLowerCase().includes(search.toLowerCase())  
     )
 
     const processedBooks = filteredBooks.map(book => {
-        const bookIdStr = book._id?.toString()
+        const bookIdStr = book._id?.toString()  //convert book id into standard string
         
-        // Find bookmarks for likes and ratings
-        const bookBookmarks = bookmarks ? bookmarks.filter(b => {
-            const bContentId = b.contentId?._id || b.contentId
-            return bContentId?.toString() === bookIdStr
-        }) : []
+        // For likes and ratings
+        const bookBookmarks = bookmarks ? bookmarks.filter(b => {  //to find only bookmark that specific to that book from bookmarks
+            const bContentId = b.contentId?._id || b.contentId  //It safely handles whether contentId is stored as object or a raw ID string
+            return bContentId?.toString() === bookIdStr //compart with standard string 
+        }) : [] //if no bookmark exits then empty array
 
-        // Find standalone comments for this book from the comments collection
+        // Find Comments
         const bookComments = comments ? comments.filter(c => {
             const cContentId = c.contentId?._id || c.contentId
             return cContentId?.toString() === bookIdStr
@@ -47,12 +46,12 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
         // Sort comments with latest/newest comments on top
         formattedComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
-        const totalLikes = bookBookmarks.filter(b => b.isLiked === true).length
+        const totalLikes = bookBookmarks.filter(b => b.isLiked === true).length  //calculate the total like count
         
-        const ratedBookmarks = bookBookmarks.filter(b => b.rating !== undefined && b.rating !== null && b.rating > 0)
+        const ratedBookmarks = bookBookmarks.filter(b => b.rating !== undefined && b.rating !== null && b.rating > 0)  
         const avgRating = ratedBookmarks.length > 0 
-            ? (ratedBookmarks.reduce((sum, b) => sum + Number(b.rating), 0) / ratedBookmarks.length) 
-            : 0
+            ? (ratedBookmarks.reduce((sum, b) => sum + Number(b.rating), 0) / ratedBookmarks.length)  //sums them up using .reduce() and calc average
+            : 0  //defaulting to 0 if no ratings exist
 
         return {
             ...book,
@@ -127,7 +126,7 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
                 </Table>
             </TableContainer>
 
-            {/* Compact & Scrollable Comments Dialog */}
+{/* ---------------------Book Comments Dialog--------------------- */}
             {selectedBookComments && (
                 <Dialog 
                     open={true} 
@@ -145,7 +144,7 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
                         }
                     }}
                 >
-                    {/* Header */}
+    {/* Header--------------------- */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#140f0c', px: '20px', py: '14px', borderBottom: '1px solid #321e11' }}>
                         <Box>
                             <Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#fbbf24', fontWeight: 600 }}>
@@ -163,7 +162,7 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
                         </IconButton>
                     </Box>
 
-                    {/* Scrollable Comments Container */}
+    {/* Comments Container-------------- */}
                     <Box 
                         sx={{ 
                             p: '16px', 
@@ -216,7 +215,7 @@ function BookAnalytic({ books, users, logs, bookmarks, search, sortOption }) {
                         )}
                     </Box>
 
-                    {/* Footer */}
+    {/* Footer-------------------------- */}
                     <Box sx={{ px: '20px', py: '12px', bgcolor: '#140f0c', borderTop: '1px solid #321e11', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography sx={{ color: '#9ca3af', fontSize: '0.75rem' }}>
                             Showing <strong>{selectedBookComments.comments.length}</strong> {selectedBookComments.comments.length === 1 ? 'comment' : 'comments'}

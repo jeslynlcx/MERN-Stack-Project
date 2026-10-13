@@ -9,7 +9,7 @@ function Navbar() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const isActive = (path) => location.pathname === path // checks if a path matches the current page URL[cite: 14]
+    const isActive = (path) => location.pathname === path // checks if a path matches the current page URL
     const token = localStorage.getItem("token") 
     const userRole = localStorage.getItem("role") 
 
@@ -18,10 +18,10 @@ function Navbar() {
 
         const fetchAvatar = async () => {
             try {
-                const userId = JSON.parse(window.atob(token.split('.')[1])).userId // extract the userID[cite: 14]
+                const userId = JSON.parse(window.atob(token.split('.')[1])).userId // extract the userID
                 const response = await api.get(`/users/${userId}`)
 
-                if (response.data?.avatarUrl) { // Checks if the response successfully includes avatar URL[cite: 14].
+                if (response.data?.avatarUrl) { // Checks if the response successfully includes avatar URL.
                     const url = response.data.avatarUrl
                     setAvatarUrl(url.startsWith('http') ? url : `http://localhost:2406${url}`)
                 }

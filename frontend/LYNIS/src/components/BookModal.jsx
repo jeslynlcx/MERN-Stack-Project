@@ -73,7 +73,6 @@ function Book({ book, onClose }) {
 
                 // Sort with latest/newest comments on top
                 formattedComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-
                 setComments(formattedComments)
             })
             .catch(error => console.error("Error fetching comments:", error))
@@ -158,7 +157,7 @@ function Book({ book, onClose }) {
         >
             <Fade in={true}>
                 <Box 
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}  //stops an event from triggering parent elements
                     sx={{
                         backgroundColor: '#17110d',
                         color: '#ffffff',
@@ -295,7 +294,7 @@ function Book({ book, onClose }) {
                             Community Discussion
                         </Typography>
                         
-                        {/* Scrollable Container ONLY for Comments */}
+                        {/* Comments */}
                         <Box sx={{ maxHeight: '180px', overflowY: 'auto', mb: '16px', pr: '4px', display: 'flex', flexDirection: 'column', gap: '10px', scrollbarWidth: 'thin', scrollbarColor: '#1e1b1a #0b0806' }}>
                             {comments.length === 0 ? (
                                 <Typography sx={{ color: '#888', fontSize: '13px' }}>No comments yet. Be the first to share your thoughts!</Typography>

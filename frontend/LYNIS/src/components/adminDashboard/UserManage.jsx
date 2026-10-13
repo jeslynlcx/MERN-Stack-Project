@@ -2,13 +2,12 @@ import { Box, Button, Select, MenuItem, Table, TableBody, TableCell, TableContai
 import api from '../../utils/api';
 
 function UserManage({ users, setUsers, search, currentUserId }) {
-    const handleEdit = async (userId, newRole) => {
+    const handleEdit = async (userId, newRole) => {  //edit role 
         const firstUser = users[0] 
         if ((firstUser && firstUser._id === userId) || userId === currentUserId) { 
             alert("Account cannot be modified.")
             return
         }
-
         try {
             const token = localStorage.getItem("token")
             await api.put(`/users/${userId}`, { role: newRole }, {
@@ -31,9 +30,7 @@ function UserManage({ users, setUsers, search, currentUserId }) {
             alert("Administrator accounts cannot be deleted.")
             return
         }
-
         if (!window.confirm(`Are you sure you want to delete user "${userToDelete.username}"?`)) return
-
         try {
             await api.delete(`/users/${userToDelete._id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

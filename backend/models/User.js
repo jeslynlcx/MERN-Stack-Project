@@ -25,17 +25,17 @@ const UserSchema = mongoose.Schema({
     }
 })
 
-UserSchema.pre('save', function (next) {
-    if(!this.isModified('password')){
-        next
+UserSchema.pre('save', function (next) { //Tells Mongoose run this function automatically before (pre) User document saved to database
+    if(!this.isModified('password')){ // This checks if the password field was modified
+        next   //If the user is just updating their profile info not their password, it skips hashing
     }
-    this.password = bcrypt.hashSync(this.password, +process.env.BCRYPT_SALT_ROUNDS)
+    this.password = bcrypt.hashSync(this.password, +process.env.BCRYPT_SALT_ROUNDS) //if pass modified replace text to hash, '+' turn variable to number
     next
 })
 
-UserSchema.methods.comparePassword = function (password) {
-    return bcrypt.compareSync(password, this.password)
-}
+UserSchema.methods.comparePassword = function (password) { //function that you can call on any User whenever a user tries to log in
+    return bcrypt.compareSync(password, this.password) //Use bcrypt to compare the plain-text password that typed at login form
+}     // against (this.password) stores in database
 
 const User = mongoose.model('User', UserSchema)
 module.exports = User

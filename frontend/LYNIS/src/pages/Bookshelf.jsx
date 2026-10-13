@@ -42,8 +42,8 @@ function Bookshelf() {
             return 0
         })
 
-    const totalPages = Math.ceil(processedContents.length / ITEMS_PER_PAGE) || 1
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    const totalPages = Math.ceil(processedContents.length / ITEMS_PER_PAGE) || 1 //round up the total page divide the number of filteredbook by how many fit on a single page ensure at least 1
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE 
     const currentBookshelfItems = processedContents.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
     const shelfRows = [
@@ -123,7 +123,7 @@ function Bookshelf() {
                                 minWidth: "150px"
                             }}
                         >
-                            {["All", ...new Set(contents.map((item) => item.category).filter(Boolean))].map((cat) => (
+                            {["All", ...new Set(contents.filter(item => isAdmin || (item.status || "Published") === "Published").map((item) => item.category).filter(Boolean))].map((cat) => (
                                 <MenuItem key={cat} value={cat}>{cat}</MenuItem>
                             ))}
                         </Select>

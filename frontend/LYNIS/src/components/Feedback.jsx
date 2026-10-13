@@ -21,7 +21,6 @@ function Feedback() {
     const [comment, setComment] = useState("")
     const [actionType, setActionType] = useState("FEEDBACK_REVIEWED")
     const [submitting, setSubmitting] = useState(false)
-    
     const [myHistory, setMyHistory] = useState([])
     const [loadingHistory, setLoadingHistory] = useState(false)
 
@@ -31,7 +30,7 @@ function Feedback() {
         }
     }, [activeTab, isOpen])
 
-    const fetchMyHistory = async () => {
+    const fetchMyHistory = async () => {   //fetch only their own account feedback history
         setLoadingHistory(true)
         try {
             const token = localStorage.getItem("token")
@@ -65,7 +64,7 @@ function Feedback() {
 
             alert("Thank you! Your submission has been recorded successfully.")
             setComment("")
-            setActiveTab("history")
+            setActiveTab("history")  //once submit then will turn to history page
             fetchMyHistory()
         } catch (error) {
             console.error("Failed to submit feedback:", error)

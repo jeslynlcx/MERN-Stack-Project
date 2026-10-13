@@ -19,22 +19,19 @@ exports.getContentById = async (req, res) => {
     }
 }
 
-exports.addNewContent = async (req, res) => {
+exports.addNewContent = async (req, res) => {  
     try {
         let coverImageUrl = req.body.coverImageUrl || ""
-
         let contentImageUrls = []
-
-        // If URL was entered
-        if (req.body.contentImageUrls) {
+        
+        if (req.body.contentImageUrls) { // If URL was entered
             contentImageUrls = req.body.contentImageUrls
-                .split(",")
-                .map(url => url.trim())
-                .filter(url => url !== "")
+                .split(",")  //Splits the single long string into an array by 逗号
+                .map(url => url.trim())  //Loops through each URL in the array and removes any extra spaces at beginning or end using .trim()
+                .filter(url => url !== "") //Removes any empty strings from the array
         }
 
-        // Cover upload
-        if (
+        if (  // Cover upload
             req.files &&
             req.files.coverImage &&
             req.files.coverImage[0]
@@ -43,8 +40,7 @@ exports.addNewContent = async (req, res) => {
                 `/uploads/${req.files.coverImage[0].filename}`
         }
 
-        // Content image uploads
-        if (
+        if (  // Content image uploads
             req.files &&
             req.files.contentImages &&
             req.files.contentImages.length > 0
@@ -63,93 +59,73 @@ exports.addNewContent = async (req, res) => {
             totalPages: req.body.totalPages,
             status: req.body.status
         })
-
         await newContent.save()
-
         res.status(201).json(newContent)
-
     } catch (error) {
         console.error(error)
-
-        res.status(400).json({
-            error: error.message
-        })
+        res.status(400).json({error: error.message})
     }
 }
 
 exports.updateContent = async (req, res) => {
     try {
         const { id } = req.params
+        
+        // 1. Find existing content to preserve unedited pages
+        const existingContent = await Content.findById(id)
+        if (!existingContent) {
+            return res.status(404).json({error: "Content not found"})
+        }
 
         const updateData = {
-            name: req.body.name,
-            description: req.body.description,
-            category: req.body.category,
-            totalPages: req.body.totalPages,
-            status: req.body.status
+            name: req.body.name || existingContent.name,
+            description: req.body.description || existingContent.description,
+            category: req.body.category || existingContent.category,
+            totalPages: req.body.totalPages || existingContent.totalPages,
+            status: req.body.status || existingContent.status,
+            coverImageUrl: existingContent.coverImageUrl,
+            contentImageUrls: [...existingContent.contentImageUrls] // Start with existing pages
         }
 
-        // Cover URL
-        if (req.body.coverImageUrl) {
-            updateData.coverImageUrl =
-                req.body.coverImageUrl
+        // Cover image updates
+        if (req.body.coverImageUrl) {  
+            updateData.coverImageUrl = req.body.coverImageUrl
+        }
+        if (req.files && req.files.coverImage && req.files.coverImage[0]) {
+            updateData.coverImageUrl = `/uploads/${req.files.coverImage[0].filename}`
         }
 
-        // Content image URLs
+        // If user sends an explicit array or comma-separated list of page URLs to sync
         if (req.body.contentImageUrls) {
-            updateData.contentImageUrls =
-                req.body.contentImageUrls
-                    .split(",")
-                    .map(url => url.trim())
-                    .filter(url => url !== "")
+            const incomingUrls = req.body.contentImageUrls
+                .split(",")
+                .map(url => url.trim()) //update existing slots or add new ones, keeping placeholders for files
+            updateData.contentImageUrls = incomingUrls
         }
 
-        // New uploaded cover
-        if (
-            req.files &&
-            req.files.coverImage &&
-            req.files.coverImage[0]
-        ) {
-            updateData.coverImageUrl =
-                `/uploads/${req.files.coverImage[0].filename}`
-        }
-
-        // New uploaded pages
-        if (
-            req.files &&
-            req.files.contentImages &&
-            req.files.contentImages.length > 0
-        ) {
-            updateData.contentImageUrls =
-                req.files.contentImages.map(file =>
-                    `/uploads/${file.filename}`
-                )
-        }
-
-        const updatedContent =
-            await Content.findByIdAndUpdate(
-                id,
-                updateData,
-                {
-                    new: true,
-                    runValidators: true
+        //  Merge newly uploaded files into their specific page index if provided
+        if (req.files && req.files.contentImages && req.files.contentImages.length > 0) {
+            let fileIndex = 0
+            req.files.contentImages.forEach(file => {
+                const newFilepath = `/uploads/${file.filename}`
+                // Find where the placeholder or file name was designated, or push/replace
+                const placeholderIndex = updateData.contentImageUrls.findIndex(url => url.includes(file.originalname) || url.includes("temp-file"))
+                if (placeholderIndex !== -1) {
+                    updateData.contentImageUrls[placeholderIndex] = newFilepath
+                } else {
+                    updateData.contentImageUrls.push(newFilepath)
                 }
-            )
-
-        if (!updatedContent) {
-            return res.status(404).json({
-                error: "Content not found"
             })
         }
-
+        // Filter out empty strings
+        updateData.contentImageUrls = updateData.contentImageUrls.filter(url => url !== "")
+        const updatedContent = await Content.findByIdAndUpdate(
+            id, updateData, { new: true, runValidators: true }
+        )
         res.json(updatedContent)
-
     } catch (error) {
         console.error(error)
-
-        res.status(400).json({
-            error: error.message
-        })
+        res.status(400).json({error: error.message})
     }
 }
 

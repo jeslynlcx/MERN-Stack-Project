@@ -281,8 +281,7 @@ function Dashboard() {
                                         ".MuiSvgIcon-root": { color: "#9ca3af" }
                                     }}
                                 >
-                                    <MenuItem value="latest">Sort: Latest (Default)</MenuItem>
-                                    <MenuItem value="oldest">Sort: Oldest First</MenuItem>
+                                    <MenuItem value="latest">Sort: Newest First (Default)</MenuItem>
                                     <MenuItem value="user">Sort by: User (A-Z)</MenuItem>
                                 </Select>
 

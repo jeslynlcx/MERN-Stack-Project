@@ -1,8 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-// Single Image Page Component
-const BookPage = React.forwardRef((props, ref) => {
+const BookPage = React.forwardRef((props, ref) => {  //for page-flip animations and libraries that need direct DOM access to measure and turn pages
   const imageUrl = props.imageUrl.startsWith('http') ? props.imageUrl : `http://localhost:2406${props.imageUrl}`
   
   return (

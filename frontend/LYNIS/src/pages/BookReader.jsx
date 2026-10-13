@@ -48,7 +48,7 @@ function BookReader() {
           }
         }
 
-        // Fallback: Fetch user bookmarks if no URL query param was provided
+        // Fetch user bookmarks if no URL query param was provided
         if (token && userId) {
           const bookmarksResponse = await api.get(`/bookmarks`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -88,7 +88,7 @@ function BookReader() {
   }, [id])
 
   // Handle page flip from HTMLFlipBook
-  const handlePageFlip = (flipEvent) => {
+  const handlePageFlip = (flipEvent) => {  //when page flip it update the current page status
     const newPageNumber = flipEvent.data
     setCurrentPageNum(newPageNumber)
     saveReadingProgress(newPageNumber)
@@ -110,7 +110,7 @@ function BookReader() {
 
   const processedPages = [...pages]
   if (processedPages.length % 2 !== 0) {
-    processedPages.push("END_PAGE_MARKER")
+    processedPages.push("END_PAGE_MARKER")  // if the pages is odd shows the end page marker
   }
 
   const totalItemsCount = processedPages.length

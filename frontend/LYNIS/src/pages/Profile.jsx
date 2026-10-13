@@ -10,13 +10,9 @@ function Profile() {
     const [activeTab, setActiveTab] = useState("watched") // 'watched' or 'liked'
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    
-    // Edit Profile Modal States
     const [isEditing, setIsEditing] = useState(false)
     const [editUsername, setEditUsername] = useState("")
     const [editAvatarUrl, setEditAvatarUrl] = useState("")
-
-    // Filter and Sort states
     const [selectedCategory, setSelectedCategory] = useState("All")
     const [sortBy, setSortBy] = useState("recent")
 
@@ -31,21 +27,19 @@ function Profile() {
                     setError("No active session found. Please log in.")
                     return
                 }
-
                 // Decode user ID directly from the JWT token payload
                 let currentUserId = null
                 try {
                     const base64Url = token.split('.')[1]
                     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-                    }).join(''))
+                    //replace（- 和 _）替换成（+ 和 /）to decode the base64 string into a readable JSON string.浏览器能认识的标准符号
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)}).join(''))
+                    //把 Base64 编码的密码串，还原成原始的字节/字符。把句子切成单个字母。找出这个字符在计算机里的编码数字。：把数字转成 16 进制。确保它变成标准的两位数格式
                     const decoded = JSON.parse(jsonPayload)
                     currentUserId = decoded.id || decoded._id || decoded.userId || decoded.sub
                 } catch (e) {
                     console.error("Token decode error:", e)
                 }
-
                 if (!currentUserId) {
                     setLoading(false)
                     setError("Could not extract user ID from token session.")
@@ -60,8 +54,7 @@ function Profile() {
                 setEditUsername(userResponse.data.username || "")
                 setEditAvatarUrl(userResponse.data.avatarUrl || "")
 
-                // Fetch bookmarks / reading history
-                const bookmarksResponse = await api.get("/bookmarks", {
+                const bookmarksResponse = await api.get("/bookmarks", { // Fetch bookmarks / reading history
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 
@@ -134,7 +127,7 @@ function Profile() {
 
     const isAdmin = user.role === 'admin'
 
-    // Extract categories dynamically (hiding locked categories for normal users)
+    // hiding locked categories for normal users
     const categories = ["All", ...new Set(items.map(item => {
         const bookData = item.contentId || item.content || item
         const isLocked = bookData.status === "Draft" || bookData.status === "Archived"
@@ -142,7 +135,6 @@ function Profile() {
         return bookData.category
     }).filter(Boolean))]
 
-    // Filter and Sort logic: Hides locked books for regular users, shows them for admins
     const filteredItems = items.filter(item => {
         const bookData = item.contentId || item.content || item
         
