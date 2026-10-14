@@ -153,7 +153,7 @@ function BookReader() {
                 return (
                   <div key={`end-${index}`} className="end-page-marker">
                     <p className="end-page-text" onClick={() => navigate(-1)}>
-                      End &rarr
+                      End →
                     </p>
                   </div>
                 )

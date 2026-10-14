@@ -44,7 +44,7 @@ function Navbar() {
                     padding: '0px 32px',
                     margin: '0 auto',
                     width: '100%',
-                    maxWidth: '1200px',
+                    // maxWidth: '1200px',
                     boxSizing: 'border-box',
                     background: 'rgba(18, 13, 10, 0.9)',
                     backdropFilter: 'blur(12px)',

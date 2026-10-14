@@ -63,21 +63,24 @@ function Profile() {
                 const uniqueMap = new Map()
                 
                 rawBookmarks.forEach(b => {
-                    const bookObj = b.contentId || b.content || b
-                    const bookId = bookObj._id || bookObj.id || (typeof b.contentId === 'string' ? b.contentId : null)
+                    // dont show the content that are deleted
+                    if (!b.contentId || typeof b.contentId !== 'object') return
+
+                    const bookObj = b.contentId
+                    const bookId = bookObj._id || bookObj.id
                     if (!bookId) return
 
-                    const existing = uniqueMap.get(bookId)
+                    const existing = uniqueMap.get(bookId) //check is the book saved
                     if (!existing) {
-                        uniqueMap.set(bookId, b)
+                        uniqueMap.set(bookId, b) //if its new , add the bookmark
                     } else {
                         const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime()
                         const incomingTime = new Date(b.updatedAt || b.createdAt || 0).getTime()
                         
-                        const mergedIsLiked = existing.isLiked || b.isLiked || existing.liked || b.liked
-                        const mergedLastPage = Math.max(existing.lastReadPage || existing.lastPage || 1, b.lastReadPage || b.lastPage || 1)
+                        const mergedIsLiked = existing.isLiked || b.isLiked || existing.liked || b.liked  //ensure that book is mark as liked
+                        const mergedLastPage = Math.max(existing.lastReadPage || existing.lastPage || 1, b.lastReadPage || b.lastPage || 1)  //pick the furthest page user read
                         
-                        if (incomingTime >= existingTime) {
+                        if (incomingTime >= existingTime) {  //compare the timestap , best result newest record combine with like and page progress
                             uniqueMap.set(bookId, { ...b, isLiked: mergedIsLiked, lastReadPage: mergedLastPage })
                         } else {
                             uniqueMap.set(bookId, { ...existing, isLiked: mergedIsLiked, lastReadPage: mergedLastPage })
@@ -85,7 +88,7 @@ function Profile() {
                     }
                 })
 
-                setItems(Array.from(uniqueMap.values()))
+                setItems(Array.from(uniqueMap.values()))  //grab unique bookmark , convert to standardJS
 
             } catch (err) {
                 console.error("Fetch error: ", err)

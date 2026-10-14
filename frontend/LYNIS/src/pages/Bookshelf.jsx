@@ -189,7 +189,7 @@ function Bookshelf() {
                             ) : (
                                 shelfRows.map((rowItems, rowIndex) => (
                                     <Box key={rowIndex}>
-                                        <Box sx={{
+                                        <Box sx={{  //book position
                                             display: "flex",
                                             justifyContent: "center",
                                             alignItems: "flex-end",
@@ -209,7 +209,7 @@ function Bookshelf() {
                                                         key={item._id}
                                                         onClick={() => handleOpenBookModal(item)}
                                                         className="book-card-item"
-                                                        sx={{
+                                                        sx={{ //book hover
                                                             position: "relative",
                                                             cursor: isLocked ? "not-allowed" : "pointer",
                                                             transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
@@ -238,7 +238,7 @@ function Bookshelf() {
                                                                 src={item.coverImageUrl?.startsWith("http") ? item.coverImageUrl : `http://localhost:2406${item.coverImageUrl}`}
                                                                 alt={item.name}
                                                                 onError={(e) => { e.target.style.display = "none" }}
-                                                                sx={{
+                                                                sx={{   //book cover
                                                                     width: "120px",
                                                                     height: "170px",
                                                                     objectFit: "cover",
@@ -251,7 +251,7 @@ function Bookshelf() {
                                                             
                                                             <Box
                                                                 className="book-hover-overlay"
-                                                                sx={{
+                                                                sx={{  //book hover content
                                                                     display: "flex",
                                                                     flexDirection: "column",
                                                                     justifyContent: "center",

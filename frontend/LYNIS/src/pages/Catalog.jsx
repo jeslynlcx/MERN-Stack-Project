@@ -70,7 +70,7 @@ function Catalog() {
     }
 
     const handleDelete = async (id, e) => {
-        e.stopPropagation()
+        e.stopPropagation()  //to forces the event stop at that exact element
         if (window.confirm("Are you sure you want to delete this publication?")) {
             try {
                 await api.delete(`/contents/${id}`)

@@ -2,7 +2,7 @@ const ActivityLog = require('../models/ActivityLog')
 
 exports.getAllLogs = async (req, res) => {
     try {
-        const logs = await ActivityLog.find({}).populate('userId')
+        const logs = await ActivityLog.find({}).populate('userId')  // find from activitylog and specific get the userid by populate
         res.json(logs)
     } catch (error) {
         res.status(500).json({ error: error.message })

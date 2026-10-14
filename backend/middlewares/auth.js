@@ -18,7 +18,7 @@ exports.authenticate = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY) //decode the JWT using our secret key 
         const user = await User.findOne({ username: decoded.username}) //check the database to ensure the user actually exists
         if (!user) throw new Error("No user found!")
-        req.user = user
+        req.user = user //user get back from database after find the id ， attach the result
         next()
     } catch (error) {
         if (error.name === 'TokenExpiredError') {

@@ -4,9 +4,9 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL
 })
 api.interceptors.request.use((config) => {  //Before every single request leaves frontend checks if token exists
-  const token = localStorage.getItem('token') 
+  const token = localStorage.getItem('token')  //get token from local storage
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`  //put the token into the request header
   }
   return config
 }, (error) => {

@@ -27,7 +27,7 @@ exports.addNewContent = async (req, res) => {
         if (req.body.contentImageUrls) { // If URL was entered
             contentImageUrls = req.body.contentImageUrls
                 .split(",")  //Splits the single long string into an array by 逗号
-                .map(url => url.trim())  //Loops through each URL in the array and removes any extra spaces at beginning or end using .trim()
+                .map(url => url.trim())  //go in each URL in the array and removes any extra spaces at beginning or end using .trim()
                 .filter(url => url !== "") //Removes any empty strings from the array
         }
 
@@ -71,8 +71,7 @@ exports.updateContent = async (req, res) => {
     try {
         const { id } = req.params
         
-        // 1. Find existing content to preserve unedited pages
-        const existingContent = await Content.findById(id)
+        const existingContent = await Content.findById(id) 
         if (!existingContent) {
             return res.status(404).json({error: "Content not found"})
         }
@@ -99,20 +98,20 @@ exports.updateContent = async (req, res) => {
         if (req.body.contentImageUrls) {
             const incomingUrls = req.body.contentImageUrls
                 .split(",")
-                .map(url => url.trim()) //update existing slots or add new ones, keeping placeholders for files
+                .map(url => url.trim()) //update existing slots or add new ones
             updateData.contentImageUrls = incomingUrls
         }
 
         //  Merge newly uploaded files into their specific page index if provided
-        if (req.files && req.files.contentImages && req.files.contentImages.length > 0) {
+        if (req.files && req.files.contentImages && req.files.contentImages.length > 0) { //check whether image uploaded
             let fileIndex = 0
             req.files.contentImages.forEach(file => {
-                const newFilepath = `/uploads/${file.filename}`
-                // Find where the placeholder or file name was designated, or push/replace
+                const newFilepath = `/uploads/${file.filename}` 
+                // Find where the file name  push/replace
                 const placeholderIndex = updateData.contentImageUrls.findIndex(url => url.includes(file.originalname) || url.includes("temp-file"))
-                if (placeholderIndex !== -1) {
+                if (placeholderIndex !== -1) {  //找到那个index replace那个index
                     updateData.contentImageUrls[placeholderIndex] = newFilepath
-                } else {
+                } else { //找不到就push新的
                     updateData.contentImageUrls.push(newFilepath)
                 }
             })
